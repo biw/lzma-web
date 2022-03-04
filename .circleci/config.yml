@@ -1,0 +1,32 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@4.5
+
+commands:
+  install_and_cache_yarn_linux:
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+          include-branch-in-cache-key: false
+  build-plugin:
+    steps:
+      - run: yarn build
+  run-plugin-tests:
+    steps:
+      - run: yarn test:ci
+
+jobs:
+  run-tests:
+    docker:
+      - image: circleci/node:16
+    steps:
+      - install_and_cache_yarn_linux
+      - run: yarn test:karma
+      - run: yarn test
+
+workflows:
+  main:
+    jobs:
+      - run-tests
