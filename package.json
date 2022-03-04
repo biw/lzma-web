@@ -11,6 +11,9 @@
   "bugs": {
     "url": "https://github.com/biw/LZMA-JS/issues"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "files": [
     "dist"
