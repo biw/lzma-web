@@ -1,68 +1,96 @@
-# lzma.js
+# `lzma.js`
 
-lzma.js is a JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm. It is a fork of [LZMA-JS](https://github.com/nmrugg/LZMA-JS) written by [Nathan Rugg](https://github.com/nmrugg).
+`lzma.js` is a JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm.
+
+**The codebase is a fork of [LZMA-JS](https://github.com/nmrugg/LZMA-JS) written by [Nathan Rugg](https://github.com/nmrugg).**
 
 ## Install
 
-lzma.js is available in the npm repository.
-
 ```sh
-yarn add @719ben/lzma
+yarn add lzma.js
 ```
 
 ## Usage
 
 ```js
-import { LZMA } from '@719ben/lzma'
-const my_lzma = new LZMA()
+import LZMA from 'lzma.js'
+const lzma = new LZMA()
 
-/// To compress:
-///NOTE: mode can be 1-9 (1 is fast and pretty good; 9 is slower and probably much better).
-///NOTE: compress() can take a string or an array of bytes.
-///      (A Node.js Buffer or a Uint8Array instance counts as an array of bytes.)
-my_lzma.compress(string || byte_array, mode, on_finish(result, error) {}, on_progress(percent) {});
+const str = "Hello World"
 
-/// To decompress:
-///NOTE: By default, the result will be returned as a string if it decodes as valid UTF-8 text;
-///      otherwise, it will return a Uint8Array instance.
-my_lzma.decompress(byte_array, on_finish(result, error) {}, on_progress(percent) {});
+const compressed = await lzma.compress(str)
+
+const decompressed = await lzma.decompress(compressed)
+
+console.log(str === decompressed) // -> true
 ```
 
-## Notes
-
-The `decompress()` function needs an array of bytes or a Node.js `Buffer` object.
-
-If the decompression progress is unable to be calculated, the `on_progress()` function will be triggered once with the value `-1`.
-
-LZMA-JS will try to use Web Workers if they are available.  If the environment does not support Web Workers,
-it will just do something else, and it won't pollute the global scope.
-Each call to `LZMA()` will create a new Web Worker, which can be accessed via `my_lzma.worker()`.
-
-LZMA-JS was originally based on gwt-lzma, which is a port of the LZMA SDK from Java into JavaScript.
-
-## But I don't want to use Web Workers
-
-If you'd prefer not to bother with Web Workers, you can use the functions directly. For example:
+You can also set the compression level on `compress` via an optional second parameter:
 
 ```js
-import { compress, decompress } from '@719ben/lzma'
-
-compress(string || byte_array, mode, on_finish(result, error) {}, on_progress(percent) {});
-
-decompress(byte_array, on_finish(result, error) {}, on_progress(percent) {});
+// value ranges from `1` (fastest) to `9` best
+const compressed = await lzma.compress("Hello World", 1)
 ```
 
-In Node.js, the Web Worker code is already skipped, so there's no need to do this.
+Finally, lzma.js also supports compression progress via callbacks (for large payloads):
+
+```js
+const str = "Hello World"
+
+lmza.cb.compress(
+  str, 
+  9, // compression level must be set when using callback
+  (result, error) => { // when the compression finishes or errors
+    if (error) throw error
+    console.log(results)
+  },
+  (progressPercentage) => {
+    console.log('the current percentage is', progressPercentage)
+  },
+)
+```
+
+and decompression progress via callbacks:
+
+```js
+const byteArray = [/* <array of bytes> */]
+
+lzma.cb.decompress(
+  byteArray,
+  (result, error) => {
+    if (error) throw error
+    console.log(results)
+  },
+  // If the decompression progress is unable to be calculated, the 
+  // `on_progress()` function will be triggered once with the value `-1`.
+  (progressPercentage) => {
+    console.log('the current percentage is', progressPercentage)
+  }
+)
+```
+
+## Typescript
+
+The repo has typescript support. You can view the types in [`index.d.ts`](https://github.com/biw/lzma.js/blob/main/index.d.ts).
+
+## Web Workers
+
+If the current browser supports web workers, `lzma.js` uses them to prevent blocking the main thread.
+
+Each call of `new LZMA()` will create a new web worker.
+
+In Node.js and unsupported browsers, `lzma.js` is run in the main thread.
+
+Almost all modern browsers support web workers: [https://caniuse.com/webworkers](https://caniuse.com/webworkers)
 
 ## Demos
 
-Live demos can be found [here](http://lzma-js.github.io/LZMA-JS/).
+Live demos can be found at [http://lzma-js.github.io/LZMA-JS/](http://lzma-js.github.io/LZMA-JS/).
 
 ## Compatibility
 
-LZMA-JS is compatible with anything that is compatible with the reference implementation of LZMA, for example, the `lzma` command.
-
+`lzma.js` is compatible with the reference implementation of LZMA, for example, the `lzma` command.
 
 ## License
 
-[MIT](https://github.com/biw/LZMA-JS/blob/master/LICENSE)
+[Nathan Rugg](https://github.com/nmrugg) - [MIT](https://github.com/biw/LZMA-JS/blob/master/LICENSE)

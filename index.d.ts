@@ -2,28 +2,45 @@
 
 type Mode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-type compress = (
-  input: string | Uint8Array,
-  mode: Mode,
-  onFinish: (result: number[] | null, error: Error | null) => void,
-  onProgress?: (percentage: number) => void
-) => void;
-
-type decompress = (
-  byteArray: ArrayLike<number>,
-  onFinish: (result: string | null, error: Error | null) => void,
-  onProgress?: (percentage: number) => void
-) => void;
-
-declare module "@719ben/lzma" {
-  export const compress: compress;
-  export const decompress: decompress;
+declare module "lzma.js" {
   /** The class uses a web worker */
   export class LZMA {
     compress: (
-      input: string | ArrayLike<number>,
+      input: string | Uint8Array | ArrayBuffer,
       mode: Mode = 9
-    ) => Promise<number[]>;
-    decompress: (input: ArrayLike<number>) => Promise<string>;
+    ) => Promise<Uint8Array>;
+    /**
+     * By default, the result will be returned as a string if it decodes
+     * as valid UTF-8 text; otherwise, it will return a Uint8Array instance.
+     **/
+    decompress: (
+      byteArray: Uint8Array | ArrayBuffer
+    ) => Promise<string | Uint8Array>;
+
+    cb: {
+      compress: (
+        input: string | Uint8Array | ArrayBuffer,
+        mode: Mode,
+        onFinish: (result: Uint8Array | null, error: Error | null) => void,
+        onProgress?: (percentage: number) => void
+      ) => void;
+      /**
+       * By default, the result will be returned as a string if it decodes
+       * as valid UTF-8 text; otherwise, it will return a Uint8Array instance.
+       *
+       * ----
+       *
+       * If the decompression progress is unable to be calculated, the
+       * `on_progress()` function will be triggered once with the value `-1`.
+       **/
+      decompress: (
+        byteArray: Uint8Array | ArrayBuffer,
+        onFinish: (
+          result: string | Uint8Array | null,
+          error: Error | null
+        ) => void,
+        onProgress?: (percentage: number) => void
+      ) => void;
+    };
   }
 }

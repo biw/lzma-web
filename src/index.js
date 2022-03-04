@@ -3,7 +3,7 @@ const { LZMA_WORKER } = require("./lzma_worker");
 const { LZMA } = require("./lzma");
 const { compress, decompress } = LZMA();
 
-module.exports.LZMA = class lzma {
+export default class lzma {
   LZMA = new LZMA_WORKER();
   compress = async (input, mode = 9) => {
     return new Promise((res, rej) => {
@@ -21,7 +21,8 @@ module.exports.LZMA = class lzma {
       });
     });
   };
-};
-
-module.exports.compress = compress;
-module.exports.decompress = decompress;
+  cb = {
+    compress,
+    decompress,
+  };
+}

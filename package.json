@@ -1,16 +1,19 @@
 {
-  "name": "@719ben/lzma",
+  "name": "lzma.js",
+  "maintainers": [
+    "Ben Williams <git@biwills.com>"
+  ],
   "author": "Nathan Rugg <nmrugg@gmail.com>",
   "description": "A JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm",
   "version": "2.4.3",
   "types": "index.d.ts",
-  "homepage": "https://github.com/biw/LZMA-JS",
+  "homepage": "https://github.com/biw/lzma.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/biw/LZMA-JS.git"
+    "url": "git://github.com/biw/lzma.js.git"
   },
   "bugs": {
-    "url": "https://github.com/biw/LZMA-JS/issues"
+    "url": "https://github.com/biw/lzma.js/issues"
   },
   "publishConfig": {
     "access": "public"
