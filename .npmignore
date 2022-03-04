@@ -7,3 +7,5 @@ update_gh-pages.sh
 todo
 coverage/
 bower.json
+src/
+bin

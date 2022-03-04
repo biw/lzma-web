@@ -1,27 +1,38 @@
 {
+  "name": "@719ben/lzma",
   "author": "Nathan Rugg <nmrugg@gmail.com>",
-  "name": "lzma",
   "description": "A JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm",
-  "version": "2.3.2",
-  "homepage": "http://nmrugg.github.com/LZMA-JS/",
+  "version": "2.4.2",
+  "types": "index.d.ts",
+  "homepage": "https://github.com/biw/LZMA-JS",
   "repository": {
     "type": "git",
-    "url": "git://github.com/nmrugg/LZMA-JS.git"
+    "url": "git://github.com/biw/LZMA-JS.git"
   },
   "bugs": {
-    "url": "https://github.com/nmrugg/LZMA-JS/issues"
+    "url": "https://github.com/biw/LZMA-JS/issues"
   },
-  "bin": {
-    "lzma.js": "bin/lzma.js"
+  "publishConfig": {
+    "access": "public"
   },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
   "devDependencies": {
-    "uglify-js": "=2.4.16"
+    "@rollup/plugin-replace": "^2.3.1",
+    "chai": "^3.5.0",
+    "esbuild": "^0.14.24",
+    "mocha": "^7.0.1",
+    "yarn": "^1.22.17"
   },
   "scripts": {
-    "test": "node test/test-node.js && node test/test-node.js --sync"
+    "build": "rm -rf dist && node esbuild.js",
+    "test": "node test/test-node.js && node test/test-node.js --sync",
+    "prepack": "yarn build"
   },
   "license": "MIT",
-  "tonicExampleFilename": "demos/tonic_example.js",
   "keywords": [
     "lzma",
     "compression",
