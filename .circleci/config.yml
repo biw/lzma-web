@@ -21,6 +21,8 @@ jobs:
   run-tests:
     docker:
       - image: circleci/node:16
+    environment:
+      TEST_BROWSER: 1
     steps:
       - install_and_cache_yarn_linux
       - run: yarn test:karma

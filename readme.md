@@ -1,5 +1,7 @@
 LZMA Everywhere [![Travis CI](https://travis-ci.org/nmrugg/LZMA-JS.svg)](https://travis-ci.org/nmrugg/LZMA-JS/branches)
 
+
+
 [LZMA-JS](https://github.com/nmrugg/LZMA-JS) is a JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm.
 
 [![NPM](https://nodei.co/npm/lzma.png?downloads=true)](https://nodei.co/npm/lzma/)<br>
@@ -34,14 +36,8 @@ How to Get
 
 LZMA-JS is available in the npm repository.
 
-```shell
-npm install lzma
-```
-
-If you are using bower, you can download the source like this:
-
-```shell
-bower install lzma
+```sh
+yarn add @719ben/lzma
 ```
 
 How to Use

@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-// jshint bitwise:true, curly:true, eqeqeq:true, forin:true, immed:true, latedef:true, newcap:true, noarg:true, noempty:true, nonew:true, onevar:true, plusplus:true, quotmark:double, strict:true, undef:true, unused:strict, node:true
-
-"use strict";
+const { compress, decompress } = require("../dist");
 
 /// For usage see `node test-node.js --help`
 
@@ -10,7 +8,7 @@ var fs = require("fs");
 var p = require("path");
 var params = get_params();
 var my_lzma;
-var lzma_norm = require("../src/lzma_worker.js").LZMA;
+var lzma_norm = require("../dist/lzma_worker.js").LZMA;
 var path_to_files = p.join(__dirname, "files");
 var isTTY = process.stdout.isTTY;
 var total_time;
@@ -527,9 +525,10 @@ function run_all_tests() {
     announce("Testing lzma-c.js  and lzma-d.js");
 
     my_lzma = {
-      decompress: require("../src/lzma-d.js").LZMA.decompress,
-      compress: require("../src/lzma-c.js").LZMA.compress,
+      decompress: decompress,
+      compress: compress,
     };
+    console.log(my_lzma);
 
     run_tests(function (tests_passed_sep) {
       display_time();
