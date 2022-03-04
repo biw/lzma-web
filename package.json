@@ -17,7 +17,8 @@
   },
   "main": "dist/index.js",
   "files": [
-    "dist"
+    "dist",
+    "index.d.ts"
   ],
   "devDependencies": {
     "@rollup/plugin-replace": "^2.3.1",
