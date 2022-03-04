@@ -1,10 +1,6 @@
 # @719ben/lzma
 
-[LZMA-JS](https://github.com/nmrugg/LZMA-JS) is a JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm.
-
-[![NPM](https://nodei.co/npm/@719ben/lzma.png?downloads=true)](https://nodei.co/npm/@719ben/lzma/)
-
-[![NPM](https://nodei.co/npm-dl/@719ben/lzma.png?months=6)](https://nodei.co/npm/@719ben/lzma/)
+`@719ben/lzma` is a JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm. It is a fork of [LZMA-JS](https://github.com/nmrugg/LZMA-JS) written by [Nathan Rugg](https://github.com/nmrugg).
 
 ## Install
 
@@ -69,4 +65,4 @@ LZMA-JS is compatible with anything that is compatible with the reference implem
 
 ## License
 
-[MIT](https://raw.githubusercontent.com/nmrugg/LZMA-JS/master/LICENSE)
+[MIT](https://github.com/biw/LZMA-JS/blob/master/LICENSE)
