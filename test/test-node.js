@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-const { compress, decompress } = require("../dist");
+const { LZMA } = require("../dist/lzma");
+const { compress, decompress } = LZMA();
 
 /// For usage see `node test-node.js --help`
 

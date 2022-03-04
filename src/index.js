@@ -1,6 +1,6 @@
 //! © 2015 Nathan Rugg <nmrugg@gmail.com> | MIT
-const { LZMA_WORKER } = require("./lzma_worker");
-const { LZMA } = require("./lzma");
+import { LZMA_WORKER } from "./lzma_worker";
+import { LZMA } from "./lzma";
 const { compress, decompress } = LZMA();
 
 export default class lzma {
