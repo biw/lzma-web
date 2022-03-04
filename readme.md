@@ -1,4 +1,9 @@
-# `lzma.js`
+# lzma.js
+
+[![Build Status][build-badge]][build]
+[![version][version-badge]][package]
+[![bundlephobia][bundlephobia-badge]][bundlephobia]
+[![MIT License][license-badge]][license]
 
 `lzma.js` is a JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm.
 
@@ -37,7 +42,7 @@ Finally, lzma.js also supports compression progress via callbacks (for large pay
 ```js
 const str = "Hello World"
 
-lmza.cb.compress(
+lzma.cb.compress(
   str, 
   9, // compression level must be set when using callback
   (result, error) => { // when the compression finishes or errors
@@ -93,4 +98,15 @@ Live demos can be found at [http://lzma-js.github.io/LZMA-JS/](http://lzma-js.gi
 
 ## License
 
-[Nathan Rugg](https://github.com/nmrugg) - [MIT](https://github.com/biw/LZMA-JS/blob/master/LICENSE)
+[MIT](https://github.com/biw/lzma.js/blob/main/LICENSE)
+
+
+
+[build-badge]: https://img.shields.io/circleci/build/github/biw/lzma.js.svg?style=flat-square
+[build]: https://app.circleci.com/pipelines/github/biw/lzma.js
+[version-badge]: https://img.shields.io/npm/v/lzma.js.svg?style=flat-square
+[package]: https://www.npmjs.com/package/lzma.js
+[license-badge]: https://img.shields.io/npm/l/lzma.js.svg?style=flat-square
+[license]: https://github.com/biw/lzma.js/blob/master/LICENSE
+[bundlephobia]: https://bundlephobia.com/result?p=lzma.js
+[bundlephobia-badge]: https://img.shields.io/bundlephobia/minzip/lzma.js@latest?style=flat-square
