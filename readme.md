@@ -1,10 +1,10 @@
-# @719ben/lzma
+# lzma.js
 
-`@719ben/lzma` is a JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm. It is a fork of [LZMA-JS](https://github.com/nmrugg/LZMA-JS) written by [Nathan Rugg](https://github.com/nmrugg).
+lzma.js is a JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm. It is a fork of [LZMA-JS](https://github.com/nmrugg/LZMA-JS) written by [Nathan Rugg](https://github.com/nmrugg).
 
 ## Install
 
-LZMA-JS is available in the npm repository.
+lzma.js is available in the npm repository.
 
 ```sh
 yarn add @719ben/lzma
