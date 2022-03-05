@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es2015", // Compatible with older browser
+    "module": "esnext", // Compatible with both Node.js and browser
+    "lib": ["esnext", "DOM", "WebWorker"],
+    "moduleResolution": "node", // Tell tsc to look in node_modules for modules
+    "sourceMap": true, // Creates *.js.map files
+    "strict": true, // Strict types, eg. prohibits `var x=0; x=null`
+    "alwaysStrict": true, // Enable JavaScript's "use strict" mode
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "isolatedModules": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/__tests__/*"]
+}
