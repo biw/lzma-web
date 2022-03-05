@@ -2,7 +2,7 @@
 
 type Mode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-declare module "lzma.js" {
+declare module "lzma-web" {
   /** The class uses a web worker */
   export class LZMA {
     compress: (
