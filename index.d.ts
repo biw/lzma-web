@@ -1,13 +1,12 @@
-/// <reference types="node" />
-
 type Mode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 declare module "lzma-web" {
   /** The class uses a web worker */
-  export class LZMA {
+  export default class LZMA {
+    /** @param mode defaults to 9 */
     compress: (
       input: string | Uint8Array | ArrayBuffer,
-      mode: Mode = 9
+      mode?: Mode
     ) => Promise<Uint8Array>;
     /**
      * By default, the result will be returned as a string if it decodes
