@@ -14,6 +14,5 @@ module.exports = {
     browser: true,
     es2022: true,
     worker: true,
-    mocha: true,
   },
 }

@@ -9,18 +9,6 @@ export function get_hrtime(start) {
   return process.hrtime()
 }
 
-export function announce(str) {
-  let stars = '****'
-
-  for (let i = str.length - 1; i >= 0; i -= 1) {
-    stars += '*'
-  }
-
-  note(stars)
-  note('* ' + str + ' *')
-  note(stars)
-}
-
 export function color(color_code, str) {
   if (process.stdout.isTTY) {
     str = '\u001B[' + color_code + 'm' + str + '\u001B[0m'
@@ -46,15 +34,6 @@ export function display_result(str, pass) {
     good(str)
   } else {
     error(str)
-  }
-}
-
-export function progress(percent) {
-  if (isTTY) {
-    process.stdout.cursorTo(0)
-    if (percent > 0 && percent < 1) {
-      process.stdout.write((percent * 100).toFixed(2) + '%')
-    }
   }
 }
 
@@ -87,8 +66,4 @@ export function compare(a, b) {
   }
 
   return true
-}
-
-export function display_time(total_time) {
-  console.log('Total Time: ' + get_hrtime(total_time) + ' ms')
 }
