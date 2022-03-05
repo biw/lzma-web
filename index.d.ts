@@ -1,28 +1,28 @@
-type Mode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+type Mode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-declare module "lzma-web" {
+declare module 'lzma-web' {
   /** The class uses a web worker */
   export default class LZMA {
     /** @param mode defaults to 9 */
     compress: (
       input: string | Uint8Array | ArrayBuffer,
-      mode?: Mode
-    ) => Promise<Uint8Array>;
+      mode?: Mode,
+    ) => Promise<Uint8Array>
     /**
      * By default, the result will be returned as a string if it decodes
      * as valid UTF-8 text; otherwise, it will return a Uint8Array instance.
      **/
     decompress: (
-      byteArray: Uint8Array | ArrayBuffer
-    ) => Promise<string | Uint8Array>;
+      byteArray: Uint8Array | ArrayBuffer,
+    ) => Promise<string | Uint8Array>
 
     cb: {
       compress: (
         input: string | Uint8Array | ArrayBuffer,
         mode: Mode,
         onFinish: (result: Uint8Array | null, error: Error | null) => void,
-        onProgress?: (percentage: number) => void
-      ) => void;
+        onProgress?: (percentage: number) => void,
+      ) => void
       /**
        * By default, the result will be returned as a string if it decodes
        * as valid UTF-8 text; otherwise, it will return a Uint8Array instance.
@@ -36,10 +36,10 @@ declare module "lzma-web" {
         byteArray: Uint8Array | ArrayBuffer,
         onFinish: (
           result: string | Uint8Array | null,
-          error: Error | null
+          error: Error | null,
         ) => void,
-        onProgress?: (percentage: number) => void
-      ) => void;
-    };
+        onProgress?: (percentage: number) => void,
+      ) => void
+    }
   }
 }

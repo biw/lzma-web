@@ -1,28 +1,31 @@
 //! © 2015 Nathan Rugg <nmrugg@gmail.com> | MIT
-import { LZMA_WORKER } from "./lzma_worker";
-import { LZMA } from "./lzma";
-const { compress, decompress } = LZMA();
+import { compress, decompress } from './lzma_main.js'
+
+export const LZMA = {
+  compress,
+  decompress,
+}
 
 export default class lzma {
-  LZMA = new LZMA_WORKER();
   compress = async (input, mode = 9) => {
     return new Promise((res, rej) => {
-      this.LZMA.compress(input, mode, (result, error) => {
-        if (result) return res(result);
-        rej(error);
-      });
-    });
-  };
+      compress(input, mode, (result, error) => {
+        if (result) return res(result)
+        rej(error)
+      })
+    })
+  }
   decompress = async (input) => {
     return new Promise((res, rej) => {
-      this.LZMA.decompress(input, (result, error) => {
-        if (result) return res(result);
-        rej(error);
-      });
-    });
-  };
+      decompress(input, (result, error) => {
+        if (result) return res(result)
+        rej(error)
+      })
+    })
+  }
+  // eslint-disable-next-line no-undef
   cb = {
     compress,
     decompress,
-  };
+  }
 }

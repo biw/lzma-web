@@ -1,11 +1,16 @@
-const { build } = require("esbuild");
+import { build } from 'esbuild'
 
 build({
   bundle: true,
-  target: ["es2017", "node16"],
-  platform: "node",
-  sourcemap: "external",
-  entryPoints: ["./src/lzma.js", "./src/lzma_worker.js", "./src/index.js"],
-  outdir: "dist",
+  target: ['esnext', 'node16'],
+  platform: 'node',
+  sourcemap: 'external',
+  entryPoints: [
+    './src/lzma.js',
+    './src/lzma_main.js',
+    './src/worker.js',
+    './src/index.js',
+  ],
+  outdir: 'dist',
   minify: true,
-});
+})
