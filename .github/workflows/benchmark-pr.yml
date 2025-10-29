@@ -1,0 +1,113 @@
+name: Benchmark PR
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run benchmarks on PR branch
+        run: yarn test:bench --reporter=json --reporter=default > pr-bench.json
+        continue-on-error: true
+
+      - name: Save PR benchmark results
+        run: |
+          if [ -f pr-bench.json ]; then
+            mv pr-bench.json pr-results.json
+          fi
+
+      - name: Checkout main branch
+        run: |
+          git checkout origin/main
+
+      - name: Install dependencies (main)
+        run: yarn install --immutable
+
+      - name: Run benchmarks on main branch
+        run: yarn test:bench --reporter=json --reporter=default > main-bench.json
+        continue-on-error: true
+
+      - name: Save main benchmark results
+        run: |
+          if [ -f main-bench.json ]; then
+            mv main-bench.json main-results.json
+          fi
+
+      - name: Checkout PR branch again
+        uses: actions/checkout@v4
+
+      - name: Install dependencies for comparison
+        run: yarn install --immutable
+
+      - name: Compare benchmarks
+        id: compare
+        run: node scripts/compare-benchmarks.js
+        continue-on-error: true
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            let body;
+            if (fs.existsSync('benchmark-comparison.md')) {
+              body = fs.readFileSync('benchmark-comparison.md', 'utf8');
+            } else {
+              body = '⚠️ Benchmark comparison failed. Check the workflow logs for details.';
+            }
+
+            // Find existing benchmark comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const benchmarkComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('📊 Benchmark Comparison')
+            );
+
+            if (benchmarkComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: benchmarkComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }

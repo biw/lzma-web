@@ -2,3 +2,23 @@ node_modules/
 coverage/
 todo
 dist/
+
+# Test performance tracking
+test-results.json
+test-performance.csv
+
+# Benchmark comparison files
+main-results.json
+pr-results.json
+benchmark-comparison.md
+
+# Yarn Berry
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+.DS_Store

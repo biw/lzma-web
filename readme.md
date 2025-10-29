@@ -9,6 +9,8 @@
 
 **The codebase is a fork of [LZMA-JS](https://github.com/nmrugg/LZMA-JS) written by [Nathan Rugg](https://github.com/nmrugg).**
 
+> **🚀 Performance Tracking**: This project includes automated benchmark comparisons on every PR. See [PERFORMANCE.md](PERFORMANCE.md) for details.
+
 ## Install
 
 ```sh
@@ -21,7 +23,7 @@ yarn add lzma-web
 import LZMA from 'lzma-web'
 const lzma = new LZMA()
 
-const str = "Hello World"
+const str = 'Hello World'
 
 const compressed = await lzma.compress(str)
 
@@ -34,18 +36,19 @@ You can also set the compression level on `compress` via an optional second para
 
 ```js
 // value ranges from `1` (fastest) to `9` best
-const compressed = await lzma.compress("Hello World", 1)
+const compressed = await lzma.compress('Hello World', 1)
 ```
 
 Finally, lzma-web also supports compression progress via callbacks (for large payloads):
 
 ```js
-const str = "Hello World"
+const str = 'Hello World'
 
 lmza.cb.compress(
-  str, 
+  str,
   9, // compression level must be set when using callback
-  (result, error) => { // when the compression finishes or errors
+  (result, error) => {
+    // when the compression finishes or errors
     if (error) throw error
     console.log(results)
   },
@@ -58,7 +61,9 @@ lmza.cb.compress(
 and decompression progress via callbacks:
 
 ```js
-const byteArray = [/* <array of bytes> */]
+const byteArray = [
+  /* <array of bytes> */
+]
 
 lzma.cb.decompress(
   byteArray,
@@ -66,11 +71,11 @@ lzma.cb.decompress(
     if (error) throw error
     console.log(results)
   },
-  // If the decompression progress is unable to be calculated, the 
+  // If the decompression progress is unable to be calculated, the
   // `on_progress()` function will be triggered once with the value `-1`.
   (progressPercentage) => {
     console.log('the current percentage is', progressPercentage)
-  }
+  },
 )
 ```
 

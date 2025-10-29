@@ -12,20 +12,29 @@
 /// do    (decompression only)
 /** xe */
 
-var action_compress = 1
-var action_decompress = 2
-var action_progress = 3
+// Type definitions
+type LongLit = [number, number]
+type CompressMode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+type OnFinishCallback = (
+  result: Uint8Array | string | null,
+  error: Error | null,
+) => void
+type OnProgressCallback = (percent: number) => void
 
-var wait = setTimeout,
-  __4294967296 = 4294967296,
-  N1_longLit = [4294967295, -__4294967296],
-  /** cs */
-  MIN_VALUE = [0, -9223372036854775808],
-  /** ce */
-  P0_longLit = [0, 0],
-  P1_longLit = [1, 0]
+const action_compress = 1
+const action_decompress = 2
+const action_progress = 3
 
-function update_progress(percent, cbn) {
+const wait = setTimeout
+const __4294967296 = 4294967296
+const N1_longLit: LongLit = [4294967295, -__4294967296]
+/** cs */
+const MIN_VALUE: LongLit = [0, -9223372036854775808]
+/** ce */
+const P0_longLit: LongLit = [0, 0]
+const P1_longLit: LongLit = [1, 0]
+
+function update_progress(percent: number, cbn: number): void {
   postMessage({
     action: action_progress,
     cbn: cbn,
@@ -33,9 +42,9 @@ function update_progress(percent, cbn) {
   })
 }
 
-function initDim(len) {
+function initDim(len: number): any[] {
   ///NOTE: This is MUCH faster than "new Array(len)" in newer versions of v8 (starting with Node.js 0.11.15, which uses v8 3.28.73).
-  var a = []
+  const a: any[] = []
   a[len - 1] = undefined
   return a
 }
@@ -309,7 +318,7 @@ function $init_0(this$static, input, output) {
   var decoder,
     hex_length = '',
     i,
-    properties = [],
+    properties: any[] = [],
     r,
     tmp_length
 
@@ -480,7 +489,7 @@ var CrcTable = (function () {
   var i,
     j,
     r,
-    CrcTable = []
+    CrcTable: any[] = []
   for (i = 0; i < 256; ++i) {
     r = i
     for (j = 0; j < 8; ++j)
@@ -1461,7 +1470,6 @@ function $CodeOneBlock(this$static, inSize, outSize, finished) {
     curByte,
     distance,
     footerBits,
-    i,
     len,
     lenToPosState,
     matchByte,
@@ -3054,7 +3062,7 @@ var ProbPrices = (function () {
     i,
     j,
     start,
-    ProbPrices = []
+    ProbPrices: any[] = []
   for (i = 8; i >= 0; --i) {
     start = 1
     start <<= 9 - i - 1
@@ -3148,8 +3156,8 @@ function decode(utf) {
     y,
     z,
     l = utf.length,
-    buf = [],
-    charCodes = []
+    buf: any[] = [],
+    charCodes: any[] = []
   for (; i < l; ++i, ++j) {
     x = utf[i] & 255
     if (!(x & 128)) {
@@ -3202,10 +3210,10 @@ function decode(utf) {
 }
 /** de */
 /** cs */
-function encode(s) {
+function encode(s: any): any {
   var ch,
-    chars = [],
-    data,
+    chars: any[] = [],
+    data: any[] | undefined,
     elen = 0,
     i,
     l = s.length
@@ -3226,7 +3234,7 @@ function encode(s) {
       elen += 3
     }
   }
-  data = []
+  data = [] as any[]
   elen = 0
   for (i = 0; i < l; ++i) {
     ch = chars[i]
@@ -3250,28 +3258,41 @@ function toDouble(a) {
 }
 
 /** cs */
-function compress(str, mode, on_finish, on_progress) {
-  var this$static = {},
-    percent,
-    cbn, /// A callback number should be supplied instead of on_finish() if we are using Web Workers.
-    sync = typeof on_finish == 'undefined' && typeof on_progress == 'undefined'
+export function compress(
+  str: string | Uint8Array | ArrayBuffer,
+  mode: CompressMode,
+  on_finish?: OnFinishCallback | number,
+  on_progress?: OnProgressCallback,
+): Uint8Array | void {
+  const this$static: any = {}
+  let percent: number
+  let cbn: number | undefined /// A callback number should be supplied instead of on_finish() if we are using Web Workers.
+  const sync =
+    typeof on_finish == 'undefined' && typeof on_progress == 'undefined'
+
+  let on_finish_fn: OnFinishCallback | undefined
+  let on_progress_fn: OnProgressCallback | undefined
 
   if (typeof on_finish != 'function') {
     cbn = on_finish
-    on_finish = on_progress = 0
+    on_finish_fn = undefined
+    on_progress_fn = undefined
+  } else {
+    on_finish_fn = on_finish
+    on_progress_fn = on_progress
   }
 
-  on_progress =
-    on_progress ||
-    function (percent) {
+  on_progress_fn =
+    on_progress_fn ||
+    function (percent: number) {
       if (typeof cbn == 'undefined') return
 
       return update_progress(percent, cbn)
     }
 
-  on_finish =
-    on_finish ||
-    function (res, err) {
+  on_finish_fn =
+    on_finish_fn ||
+    function (res: any, err: any) {
       if (typeof cbn == 'undefined') return
 
       return postMessage({
@@ -3299,15 +3320,14 @@ function compress(str, mode, on_finish, on_progress) {
       get_mode_obj(mode),
     )
 
-    on_progress(0)
+    on_progress_fn!(0)
   } catch (err) {
-    return on_finish(null, err)
+    return on_finish_fn!(null, err as Error)
   }
 
   function do_action() {
     try {
-      var res,
-        start = new Date().getTime()
+      const start = new Date().getTime()
 
       while ($processChunkEncode(this$static.c.chunker)) {
         percent =
@@ -3315,21 +3335,21 @@ function compress(str, mode, on_finish, on_progress) {
           toDouble(this$static.c.length_0)
         /// If about 200 miliseconds have passed, update the progress.
         if (new Date().getTime() - start > 200) {
-          on_progress(percent)
+          on_progress_fn!(percent)
 
           wait(do_action, 0)
           return 0
         }
       }
 
-      on_progress(1)
+      on_progress_fn!(1)
 
-      res = $toByteArray(this$static.c.output)
+      const res = $toByteArray(this$static.c.output)
 
-      /// delay so we don’t catch errors from the on_finish handler
-      wait(on_finish.bind(null, res), 0)
+      /// delay so we don't catch errors from the on_finish handler
+      wait(on_finish_fn!.bind(null, res), 0)
     } catch (err) {
-      on_finish(null, err)
+      on_finish_fn!(null, err as Error)
     }
   }
 
@@ -3338,30 +3358,42 @@ function compress(str, mode, on_finish, on_progress) {
 }
 /** ce */
 /** ds */
-function decompress(byte_arr, on_finish, on_progress) {
-  var this$static = {},
-    percent,
-    cbn, /// A callback number should be supplied instead of on_finish() if we are using Web Workers.
-    has_progress,
-    len,
-    sync = typeof on_finish == 'undefined' && typeof on_progress == 'undefined'
+export function decompress(
+  byte_arr: Uint8Array | ArrayBuffer,
+  on_finish?: OnFinishCallback | number,
+  on_progress?: OnProgressCallback,
+): string | Uint8Array | void {
+  const this$static: any = {}
+  let percent: number
+  let cbn: number | undefined /// A callback number should be supplied instead of on_finish() if we are using Web Workers.
+  let has_progress: boolean
+  let len: number
+  const sync =
+    typeof on_finish == 'undefined' && typeof on_progress == 'undefined'
+
+  let on_finish_fn: OnFinishCallback | undefined
+  let on_progress_fn: OnProgressCallback | undefined
 
   if (typeof on_finish != 'function') {
     cbn = on_finish
-    on_finish = on_progress = 0
+    on_finish_fn = undefined
+    on_progress_fn = undefined
+  } else {
+    on_finish_fn = on_finish
+    on_progress_fn = on_progress
   }
 
-  on_progress =
-    on_progress ||
-    function (percent) {
+  on_progress_fn =
+    on_progress_fn ||
+    function (percent: number) {
       if (typeof cbn == 'undefined') return
 
       return update_progress(has_progress ? percent : -1, cbn)
     }
 
-  on_finish =
-    on_finish ||
-    function (res, err) {
+  on_finish_fn =
+    on_finish_fn ||
+    function (res: any, err: any) {
       if (typeof cbn == 'undefined') return
 
       return postMessage({
@@ -3386,22 +3418,21 @@ function decompress(byte_arr, on_finish, on_progress) {
     ///NOTE: If the data was created via a stream, it will not have a length value, and therefore we can't calculate the progress.
     has_progress = len > -1
 
-    on_progress(0)
+    on_progress_fn!(0)
   } catch (err) {
-    return on_finish(null, err)
+    return on_finish_fn!(null, err as Error)
   }
 
   function do_action() {
     try {
-      var res,
-        i = 0,
-        start = new Date().getTime()
+      let i = 0
+      const start = new Date().getTime()
       while ($processChunkDecode(this$static.d.chunker)) {
         if (++i % 1000 == 0 && new Date().getTime() - start > 200) {
           if (has_progress) {
             percent = toDouble(this$static.d.chunker.decoder.nowPos64) / len
             /// If about 200 miliseconds have passed, update the progress.
-            on_progress(percent)
+            on_progress_fn!(percent)
           }
 
           ///NOTE: This allows other code to run, like the browser to update.
@@ -3410,14 +3441,14 @@ function decompress(byte_arr, on_finish, on_progress) {
         }
       }
 
-      on_progress(1)
+      on_progress_fn!(1)
 
-      res = decode($toByteArray(this$static.d.output))
+      const res = decode($toByteArray(this$static.d.output))
 
-      /// delay so we don’t catch errors from the on_finish handler
-      wait(on_finish.bind(null, res), 0)
+      /// delay so we don't catch errors from the on_finish handler
+      wait(on_finish_fn!.bind(null, res), 0)
     } catch (err) {
-      on_finish(null, err)
+      on_finish_fn!(null, err as Error)
     }
   }
 
@@ -3451,6 +3482,3 @@ var get_mode_obj = (function () {
   }
 })()
 /** ce */
-
-export { compress, decompress }
-//# sourceMappingURL=lzma_worker.js.map
