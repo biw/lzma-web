@@ -43,173 +43,283 @@ function update_progress(percent: number, cbn: number): void {
 }
 
 function initDim(len: number): any[] {
-  ///NOTE: This is MUCH faster than "new Array(len)" in newer versions of v8 (starting with Node.js 0.11.15, which uses v8 3.28.73).
-  const a: any[] = []
-  a[len - 1] = undefined
-  return a
+  return new Array(len)
 }
 
-function add(a, b) {
-  return create(a[0] + b[0], a[1] + b[1])
-}
-
-/** cs */
-function and(a, b) {
-  return makeFromBits(
-    ~~Math.max(Math.min(a[1] / __4294967296, 2147483647), -2147483648) &
-      ~~Math.max(Math.min(b[1] / __4294967296, 2147483647), -2147483648),
-    lowBits_0(a) & lowBits_0(b),
-  )
-}
-/** ce */
-
-function compare(a, b) {
-  var nega, negb
-  if (a[0] == b[0] && a[1] == b[1]) {
-    return 0
+/**
+ * Utility class for 64-bit integer operations using [low, high] tuple representation
+ */
+class LongInt {
+  static add(a: LongLit, b: LongLit): LongLit {
+    return LongInt.create(a[0] + b[0], a[1] + b[1])
   }
-  nega = a[1] < 0
-  negb = b[1] < 0
-  if (nega && !negb) {
-    return -1
+
+  /** cs */
+  static and(a: LongLit, b: LongLit): LongLit {
+    return LongInt.makeFromBits(
+      ~~Math.max(Math.min(a[1] / __4294967296, 2147483647), -2147483648) &
+        ~~Math.max(Math.min(b[1] / __4294967296, 2147483647), -2147483648),
+      LongInt.lowBits(a) & LongInt.lowBits(b),
+    )
   }
-  if (!nega && negb) {
+  /** ce */
+
+  static compare(a: LongLit, b: LongLit): number {
+    if (a[0] == b[0] && a[1] == b[1]) {
+      return 0
+    }
+    const nega = a[1] < 0
+    const negb = b[1] < 0
+    if (nega && !negb) {
+      return -1
+    }
+    if (!nega && negb) {
+      return 1
+    }
+    if (LongInt.sub(a, b)[1] < 0) {
+      return -1
+    }
     return 1
   }
-  if (sub(a, b)[1] < 0) {
-    return -1
-  }
-  return 1
-}
 
-function create(valueLow, valueHigh) {
-  var diffHigh, diffLow
-  valueHigh %= 1.8446744073709552e19
-  valueLow %= 1.8446744073709552e19
-  diffHigh = valueHigh % __4294967296
-  diffLow = Math.floor(valueLow / __4294967296) * __4294967296
-  valueHigh = valueHigh - diffHigh + diffLow
-  valueLow = valueLow - diffLow + diffHigh
-  while (valueLow < 0) {
-    valueLow += __4294967296
-    valueHigh -= __4294967296
-  }
-  while (valueLow > 4294967295) {
-    valueLow -= __4294967296
-    valueHigh += __4294967296
-  }
-  valueHigh = valueHigh % 1.8446744073709552e19
-  while (valueHigh > 9223372032559808512) {
-    valueHigh -= 1.8446744073709552e19
-  }
-  while (valueHigh < -9223372036854775808) {
-    valueHigh += 1.8446744073709552e19
-  }
-  return [valueLow, valueHigh]
-}
-
-/** cs */
-function eq(a, b) {
-  return a[0] == b[0] && a[1] == b[1]
-}
-/** ce */
-function fromInt(value) {
-  if (value >= 0) {
-    return [value, 0]
-  } else {
-    return [value + __4294967296, -__4294967296]
-  }
-}
-
-function lowBits_0(a) {
-  if (a[0] >= 2147483648) {
-    return ~~Math.max(Math.min(a[0] - __4294967296, 2147483647), -2147483648)
-  } else {
-    return ~~Math.max(Math.min(a[0], 2147483647), -2147483648)
-  }
-}
-/** cs */
-function makeFromBits(highBits, lowBits) {
-  var high, low
-  high = highBits * __4294967296
-  low = lowBits
-  if (lowBits < 0) {
-    low += __4294967296
-  }
-  return [low, high]
-}
-
-function pwrAsDouble(n) {
-  if (n <= 30) {
-    return 1 << n
-  } else {
-    return pwrAsDouble(30) * pwrAsDouble(n - 30)
-  }
-}
-
-function shl(a, n) {
-  var diff, newHigh, newLow, twoToN
-  n &= 63
-  if (eq(a, MIN_VALUE)) {
-    if (!n) {
-      return a
+  static create(valueLow: number, valueHigh: number): LongLit {
+    valueHigh %= 1.8446744073709552e19
+    valueLow %= 1.8446744073709552e19
+    let diffHigh = valueHigh % __4294967296
+    let diffLow = Math.floor(valueLow / __4294967296) * __4294967296
+    valueHigh = valueHigh - diffHigh + diffLow
+    valueLow = valueLow - diffLow + diffHigh
+    while (valueLow < 0) {
+      valueLow += __4294967296
+      valueHigh -= __4294967296
     }
-    return P0_longLit
+    while (valueLow > 4294967295) {
+      valueLow -= __4294967296
+      valueHigh += __4294967296
+    }
+    valueHigh = valueHigh % 1.8446744073709552e19
+    while (valueHigh > 9223372032559808512) {
+      valueHigh -= 1.8446744073709552e19
+    }
+    while (valueHigh < -9223372036854775808) {
+      valueHigh += 1.8446744073709552e19
+    }
+    return [valueLow, valueHigh]
   }
-  if (a[1] < 0) {
-    throw new Error('Neg')
+
+  /** cs */
+  static eq(a: LongLit, b: LongLit): boolean {
+    return a[0] == b[0] && a[1] == b[1]
   }
-  twoToN = pwrAsDouble(n)
-  newHigh = (a[1] * twoToN) % 1.8446744073709552e19
-  newLow = a[0] * twoToN
-  diff = newLow - (newLow % __4294967296)
-  newHigh += diff
-  newLow -= diff
-  // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
-  if (newHigh >= 9223372036854775807) {
-    newHigh -= 1.8446744073709552e19
+  /** ce */
+
+  static fromInt(value: number): LongLit {
+    if (value >= 0) {
+      return [value, 0]
+    } else {
+      return [value + __4294967296, -__4294967296]
+    }
   }
-  return [newLow, newHigh]
+
+  static lowBits(a: LongLit): number {
+    if (a[0] >= 2147483648) {
+      return ~~Math.max(Math.min(a[0] - __4294967296, 2147483647), -2147483648)
+    } else {
+      return ~~Math.max(Math.min(a[0], 2147483647), -2147483648)
+    }
+  }
+
+  /** cs */
+  static makeFromBits(highBits: number, lowBits: number): LongLit {
+    const high = highBits * __4294967296
+    let low = lowBits
+    if (lowBits < 0) {
+      low += __4294967296
+    }
+    return [low, high]
+  }
+
+  private static pwrAsDouble(n: number): number {
+    if (n <= 30) {
+      return 1 << n
+    } else {
+      return LongInt.pwrAsDouble(30) * LongInt.pwrAsDouble(n - 30)
+    }
+  }
+
+  static shl(a: LongLit, n: number): LongLit {
+    n &= 63
+    if (LongInt.eq(a, MIN_VALUE)) {
+      if (!n) {
+        return a
+      }
+      return P0_longLit
+    }
+    if (a[1] < 0) {
+      throw new Error('Neg')
+    }
+    const twoToN = LongInt.pwrAsDouble(n)
+    let newHigh = (a[1] * twoToN) % 1.8446744073709552e19
+    let newLow = a[0] * twoToN
+    const diff = newLow - (newLow % __4294967296)
+    newHigh += diff
+    newLow -= diff
+    if (newHigh >= 9223372036854775807) {
+      newHigh -= 1.8446744073709552e19
+    }
+    return [newLow, newHigh]
+  }
+
+  static shr(a: LongLit, n: number): LongLit {
+    n &= 63
+    const shiftFact = LongInt.pwrAsDouble(n)
+    return LongInt.create(Math.floor(a[0] / shiftFact), a[1] / shiftFact)
+  }
+
+  static shru(a: LongLit, n: number): LongLit {
+    n &= 63
+    let sr = LongInt.shr(a, n)
+    if (a[1] < 0) {
+      sr = LongInt.add(sr, LongInt.shl([2, 0], 63 - n))
+    }
+    return sr
+  }
+  /** ce */
+
+  static sub(a: LongLit, b: LongLit): LongLit {
+    return LongInt.create(a[0] - b[0], a[1] - b[1])
+  }
+
+  static toDouble(a: LongLit): number {
+    return a[1] + a[0]
+  }
 }
 
-function shr(a, n) {
-  var shiftFact
-  n &= 63
-  shiftFact = pwrAsDouble(n)
-  return create(Math.floor(a[0] / shiftFact), a[1] / shiftFact)
+// Legacy function wrappers for compatibility during refactoring
+function add(a: LongLit, b: LongLit): LongLit {
+  return LongInt.add(a, b)
 }
-
-function shru(a, n) {
-  var sr
-  n &= 63
-  sr = shr(a, n)
-  if (a[1] < 0) {
-    sr = add(sr, shl([2, 0], 63 - n))
-  }
-  return sr
+/** cs */
+function and(a: LongLit, b: LongLit): LongLit {
+  return LongInt.and(a, b)
 }
-
 /** ce */
-
-function sub(a, b) {
-  return create(a[0] - b[0], a[1] - b[1])
+function compare(a: LongLit, b: LongLit): number {
+  return LongInt.compare(a, b)
+}
+/** cs */
+function eq(a: LongLit, b: LongLit): boolean {
+  return LongInt.eq(a, b)
+}
+/** ce */
+function fromInt(value: number): LongLit {
+  return LongInt.fromInt(value)
+}
+function lowBits_0(a: LongLit): number {
+  return LongInt.lowBits(a)
+}
+/** cs */
+function shl(a: LongLit, n: number): LongLit {
+  return LongInt.shl(a, n)
+}
+function shr(a: LongLit, n: number): LongLit {
+  return LongInt.shr(a, n)
+}
+function shru(a: LongLit, n: number): LongLit {
+  return LongInt.shru(a, n)
+}
+/** ce */
+function sub(a: LongLit, b: LongLit): LongLit {
+  return LongInt.sub(a, b)
+}
+function toDouble(a: LongLit): number {
+  return LongInt.toDouble(a)
 }
 
-function $ByteArrayInputStream(this$static, buf) {
-  this$static.buf = buf
-  this$static.pos = 0
-  this$static.count = buf.length
+/**
+ * Simple byte array input stream
+ */
+class ByteArrayInputStream {
+  private buf: any[]
+  private pos: number
+  private count: number
+
+  constructor(buf: any[]) {
+    this.buf = buf
+    this.pos = 0
+    this.count = buf.length
+  }
+
+  /** ds */
+  read(): number {
+    if (this.pos >= this.count) return -1
+    return this.buf[this.pos++] & 255
+  }
+  /** de */
+
+  /** cs */
+  readBytes(buf: any[], off: number, len: number): number {
+    if (this.pos >= this.count) return -1
+    len = Math.min(len, this.count - this.pos)
+    arraycopy(this.buf, this.pos, buf, off, len)
+    this.pos += len
+    return len
+  }
+  /** ce */
+}
+
+/**
+ * Simple byte array output stream
+ */
+class ByteArrayOutputStream {
+  buf: any[]
+  count: number
+
+  constructor() {
+    this.buf = new Array(32)
+    this.count = 0
+  }
+
+  toByteArray(): Uint8Array {
+    const data = this.buf.slice(0, this.count)
+    return new Uint8Array(data)
+  }
+
+  /** cs */
+  writeByte(b: number): void {
+    this.buf[this.count++] = (b << 24) >> 24
+  }
+  /** ce */
+
+  writeBytes(buf: any[], off: number, len: number): void {
+    arraycopy(buf, off, this.buf, this.count, len)
+    this.count += len
+  }
+}
+
+// Legacy function wrappers for compatibility during refactoring
+function $ByteArrayInputStream(this$static: any, buf: any[]): any {
+  const stream = new ByteArrayInputStream(buf)
+  this$static.buf = stream.buf
+  this$static.pos = stream.pos
+  this$static.count = stream.count
+  this$static.read = () => stream.read()
+  this$static.readBytes = (b: any[], o: number, l: number) => stream.readBytes(b, o, l)
   return this$static
 }
-
 /** ds */
-function $read(this$static) {
+function $read(this$static: any): number {
   if (this$static.pos >= this$static.count) return -1
   return this$static.buf[this$static.pos++] & 255
 }
 /** de */
 /** cs */
-function $read_0(this$static, buf, off, len) {
+function $read_0(
+  this$static: any,
+  buf: any[],
+  off: number,
+  len: number,
+): number {
   if (this$static.pos >= this$static.count) return -1
   len = Math.min(len, this$static.count - this$static.pos)
   arraycopy(this$static.buf, this$static.pos, buf, off, len)
@@ -218,40 +328,51 @@ function $read_0(this$static, buf, off, len) {
 }
 /** ce */
 
-function $ByteArrayOutputStream(this$static) {
-  this$static.buf = initDim(32)
-  this$static.count = 0
-  return this$static
+function $ByteArrayOutputStream(): ByteArrayOutputStream {
+  return new ByteArrayOutputStream()
 }
 
-function $toByteArray(this$static) {
-  var data = this$static.buf
-  data.length = this$static.count
-  return data
+function $toByteArray(this$static: ByteArrayOutputStream): Uint8Array {
+  return this$static.toByteArray()
 }
 
 /** cs */
-function $write(this$static, b) {
-  this$static.buf[this$static.count++] = (b << 24) >> 24
+function $write(this$static: ByteArrayOutputStream, b: number): void {
+  this$static.writeByte(b)
 }
 /** ce */
 
-function $write_0(this$static, buf, off, len) {
-  arraycopy(buf, off, this$static.buf, this$static.count, len)
-  this$static.count += len
+function $write_0(
+  this$static: ByteArrayOutputStream,
+  buf: any[],
+  off: number,
+  len: number,
+): void {
+  this$static.writeBytes(buf, off, len)
 }
 
 /** cs */
-function $getChars(this$static, srcBegin, srcEnd, dst, dstBegin) {
-  var srcIdx
-  for (srcIdx = srcBegin; srcIdx < srcEnd; ++srcIdx) {
+function $getChars(
+  this$static: string,
+  srcBegin: number,
+  srcEnd: number,
+  dst: any[],
+  dstBegin: number,
+): void {
+  for (let srcIdx = srcBegin; srcIdx < srcEnd; ++srcIdx) {
     dst[dstBegin++] = this$static.charCodeAt(srcIdx)
   }
 }
 /** ce */
 
-function arraycopy(src, srcOfs, dest, destOfs, len) {
-  for (var i = 0; i < len; ++i) {
+function arraycopy(
+  src: any[],
+  srcOfs: number,
+  dest: any[],
+  destOfs: number,
+  len: number,
+): void {
+  for (let i = 0; i < len; ++i) {
     dest[destOfs + i] = src[srcOfs + i]
   }
 }
@@ -301,7 +422,7 @@ function $init(this$static, input, output, length_0, mode) {
 }
 
 function $LZMAByteArrayCompressor(this$static, data, mode) {
-  this$static.output = $ByteArrayOutputStream({})
+  this$static.output = $ByteArrayOutputStream()
   $init(
     this$static,
     $ByteArrayInputStream({}, data),
@@ -364,7 +485,7 @@ function $init_0(this$static, input, output) {
 }
 
 function $LZMAByteArrayDecompressor(this$static, data) {
-  this$static.output = $ByteArrayOutputStream({})
+  this$static.output = $ByteArrayOutputStream()
   $init_0(this$static, $ByteArrayInputStream({}, data), this$static.output)
   return this$static
 }
@@ -485,24 +606,29 @@ function $ReduceOffsets(this$static, subValue) {
   this$static._streamPos -= subValue
 }
 
-var CrcTable = (function () {
-  var i,
-    j,
-    r,
-    CrcTable: any[] = []
-  for (i = 0; i < 256; ++i) {
-    r = i
-    for (j = 0; j < 8; ++j)
-      if ((r & 1) != 0) {
-        r >>>= 1
-        r ^= -306674912
-      } else {
-        r >>>= 1
+/**
+ * CRC32 lookup table for hash calculations
+ */
+class CrcTableClass {
+  static readonly table: number[] = (() => {
+    const table: number[] = []
+    for (let i = 0; i < 256; ++i) {
+      let r = i
+      for (let j = 0; j < 8; ++j) {
+        if ((r & 1) != 0) {
+          r >>>= 1
+          r ^= -306674912
+        } else {
+          r >>>= 1
+        }
       }
-    CrcTable[i] = r
-  }
-  return CrcTable
-})()
+      table[i] = r
+    }
+    return table
+  })()
+}
+
+const CrcTable = CrcTableClass.table
 
 function $Create_3(
   this$static,
@@ -948,23 +1074,56 @@ function $ReleaseStream(this$static) {
 }
 /** de */
 
-function GetLenToPosState(len) {
-  len -= 2
-  if (len < 4) {
-    return len
+/**
+ * LZMA utility functions used across encoding/decoding
+ */
+class LzmaUtils {
+  static getLenToPosState(len: number): number {
+    len -= 2
+    if (len < 4) {
+      return len
+    }
+    return 3
   }
-  return 3
+
+  static stateUpdateChar(index: number): number {
+    if (index < 4) {
+      return 0
+    }
+    if (index < 10) {
+      return index - 3
+    }
+    return index - 6
+  }
+
+  static initBitModels(probs: number[]): void {
+    for (let i = probs.length - 1; i >= 0; --i) {
+      probs[i] = 1024
+    }
+  }
+
+  /** cs */
+  static getPrice(prob: number, symbol: number): number {
+    return ProbPrices[(((prob - symbol) ^ -symbol) & 2047) >>> 2]
+  }
+  /** ce */
 }
 
-function StateUpdateChar(index) {
-  if (index < 4) {
-    return 0
-  }
-  if (index < 10) {
-    return index - 3
-  }
-  return index - 6
+// Legacy function wrappers
+function GetLenToPosState(len: number): number {
+  return LzmaUtils.getLenToPosState(len)
 }
+function StateUpdateChar(index: number): number {
+  return LzmaUtils.stateUpdateChar(index)
+}
+function InitBitModels(probs: number[]): void {
+  LzmaUtils.initBitModels(probs)
+}
+/** cs */
+function GetPrice(prob: number, symbol: number): number {
+  return LzmaUtils.getPrice(prob, symbol)
+}
+/** ce */
 
 /** cs */
 function $Chunker_0(this$static, encoder) {
@@ -1408,23 +1567,28 @@ function $Decoder$LiteralDecoder$Decoder2(this$static) {
 
 /** de */
 /** cs */
-var g_FastPos = (function () {
-  var j,
-    k,
-    slotFast,
-    c = 2,
-    g_FastPos = [0, 1]
-  for (slotFast = 2; slotFast < 22; ++slotFast) {
-    //k = 1 << (slotFast >> 1) - 1;
-    var s = slotFast
-    s >>= 1
-    s -= 1
-    k = 1
-    k <<= s
-    for (j = 0; j < k; ++j, ++c) g_FastPos[c] = (slotFast << 24) >> 24
-  }
-  return g_FastPos
-})()
+/**
+ * Fast position lookup table for position slot calculations
+ */
+class FastPosClass {
+  static readonly table: number[] = (() => {
+    const table = [0, 1]
+    let c = 2
+    for (let slotFast = 2; slotFast < 22; ++slotFast) {
+      let s = slotFast
+      s >>= 1
+      s -= 1
+      let k = 1
+      k <<= s
+      for (let j = 0; j < k; ++j, ++c) {
+        table[c] = (slotFast << 24) >> 24
+      }
+    }
+    return table
+  })()
+}
+
+const g_FastPos = FastPosClass.table
 
 function $Backward(this$static, cur) {
   var backCur, backMem, posMem, posPrev
@@ -2872,132 +3036,263 @@ function $MakeAsShortRep(this$static) {
 }
 /** ce */
 /** ds */
-function $BitTreeDecoder(this$static, numBitLevels) {
+/**
+ * Decoder for bit tree structures
+ */
+class BitTreeDecoder {
+  NumBitLevels: number
+  Models: number[]
+
+  constructor(numBitLevels: number) {
+    this.NumBitLevels = numBitLevels
+    this.Models = initDim(1 << numBitLevels)
+  }
+
+  decode(rangeDecoder: any): number {
+    let m = 1
+    for (let bitIndex = this.NumBitLevels; bitIndex != 0; bitIndex -= 1) {
+      m = (m << 1) + $DecodeBit(rangeDecoder, this.Models, m)
+    }
+    return m - (1 << this.NumBitLevels)
+  }
+
+  reverseDecode(rangeDecoder: any): number {
+    let m = 1
+    let symbol = 0
+    for (let bitIndex = 0; bitIndex < this.NumBitLevels; ++bitIndex) {
+      const bit = $DecodeBit(rangeDecoder, this.Models, m)
+      m <<= 1
+      m += bit
+      symbol |= bit << bitIndex
+    }
+    return symbol
+  }
+
+  static reverseDecode(
+    Models: number[],
+    startIndex: number,
+    rangeDecoder: any,
+    NumBitLevels: number,
+  ): number {
+    let m = 1
+    let symbol = 0
+    for (let bitIndex = 0; bitIndex < NumBitLevels; ++bitIndex) {
+      const bit = $DecodeBit(rangeDecoder, Models, startIndex + m)
+      m <<= 1
+      m += bit
+      symbol |= bit << bitIndex
+    }
+    return symbol
+  }
+}
+
+// Legacy function wrappers for compatibility during refactoring
+function $BitTreeDecoder(this$static: any, numBitLevels: number): any {
   this$static.NumBitLevels = numBitLevels
   this$static.Models = initDim(1 << numBitLevels)
   return this$static
 }
-
-function $Decode_0(this$static, rangeDecoder) {
-  var bitIndex,
-    m = 1
-  for (bitIndex = this$static.NumBitLevels; bitIndex != 0; bitIndex -= 1) {
+function $Decode_0(this$static: any, rangeDecoder: any): number {
+  let m = 1
+  for (let bitIndex = this$static.NumBitLevels; bitIndex != 0; bitIndex -= 1) {
     m = (m << 1) + $DecodeBit(rangeDecoder, this$static.Models, m)
   }
   return m - (1 << this$static.NumBitLevels)
 }
-
-function $ReverseDecode(this$static, rangeDecoder) {
-  var bit,
-    bitIndex,
-    m = 1,
-    symbol = 0
-  for (bitIndex = 0; bitIndex < this$static.NumBitLevels; ++bitIndex) {
-    bit = $DecodeBit(rangeDecoder, this$static.Models, m)
+function $ReverseDecode(this$static: any, rangeDecoder: any): number {
+  let m = 1
+  let symbol = 0
+  for (let bitIndex = 0; bitIndex < this$static.NumBitLevels; ++bitIndex) {
+    const bit = $DecodeBit(rangeDecoder, this$static.Models, m)
     m <<= 1
     m += bit
     symbol |= bit << bitIndex
   }
   return symbol
 }
-
-function ReverseDecode(Models, startIndex, rangeDecoder, NumBitLevels) {
-  var bit,
-    bitIndex,
-    m = 1,
-    symbol = 0
-  for (bitIndex = 0; bitIndex < NumBitLevels; ++bitIndex) {
-    bit = $DecodeBit(rangeDecoder, Models, startIndex + m)
-    m <<= 1
-    m += bit
-    symbol |= bit << bitIndex
-  }
-  return symbol
+function ReverseDecode(
+  Models: number[],
+  startIndex: number,
+  rangeDecoder: any,
+  NumBitLevels: number,
+): number {
+  return BitTreeDecoder.reverseDecode(
+    Models,
+    startIndex,
+    rangeDecoder,
+    NumBitLevels,
+  )
 }
 /** de */
 /** cs */
-function $BitTreeEncoder(this$static, numBitLevels) {
+/**
+ * Encoder for bit tree structures
+ */
+class BitTreeEncoder {
+  NumBitLevels: number
+  Models: number[]
+
+  constructor(numBitLevels: number) {
+    this.NumBitLevels = numBitLevels
+    this.Models = initDim(1 << numBitLevels)
+  }
+
+  encode(rangeEncoder: any, symbol: number): void {
+    let m = 1
+    for (let bitIndex = this.NumBitLevels; bitIndex != 0; ) {
+      bitIndex -= 1
+      const bit = (symbol >>> bitIndex) & 1
+      $Encode_3(rangeEncoder, this.Models, m, bit)
+      m = (m << 1) | bit
+    }
+  }
+
+  getPrice(symbol: number): number {
+    let m = 1
+    let price = 0
+    for (let bitIndex = this.NumBitLevels; bitIndex != 0; ) {
+      bitIndex -= 1
+      const bit = (symbol >>> bitIndex) & 1
+      price += GetPrice(this.Models[m], bit)
+      m = (m << 1) + bit
+    }
+    return price
+  }
+
+  reverseEncode(rangeEncoder: any, symbol: number): void {
+    let m = 1
+    for (let i = 0; i < this.NumBitLevels; ++i) {
+      const bit = symbol & 1
+      $Encode_3(rangeEncoder, this.Models, m, bit)
+      m = (m << 1) | bit
+      symbol >>= 1
+    }
+  }
+
+  reverseGetPrice(symbol: number): number {
+    let m = 1
+    let price = 0
+    for (let i = this.NumBitLevels; i != 0; i -= 1) {
+      const bit = symbol & 1
+      symbol >>>= 1
+      price += GetPrice(this.Models[m], bit)
+      m = (m << 1) | bit
+    }
+    return price
+  }
+
+  static reverseEncode(
+    Models: number[],
+    startIndex: number,
+    rangeEncoder: any,
+    NumBitLevels: number,
+    symbol: number,
+  ): void {
+    let m = 1
+    for (let i = 0; i < NumBitLevels; ++i) {
+      const bit = symbol & 1
+      $Encode_3(rangeEncoder, Models, startIndex + m, bit)
+      m = (m << 1) | bit
+      symbol >>= 1
+    }
+  }
+
+  static reverseGetPrice(
+    Models: number[],
+    startIndex: number,
+    NumBitLevels: number,
+    symbol: number,
+  ): number {
+    let m = 1
+    let price = 0
+    for (let i = NumBitLevels; i != 0; i -= 1) {
+      const bit = symbol & 1
+      symbol >>>= 1
+      price +=
+        ProbPrices[(((Models[startIndex + m] - bit) ^ -bit) & 2047) >>> 2]
+      m = (m << 1) | bit
+    }
+    return price
+  }
+}
+
+// Legacy function wrappers for compatibility during refactoring
+function $BitTreeEncoder(this$static: any, numBitLevels: number): any {
   this$static.NumBitLevels = numBitLevels
   this$static.Models = initDim(1 << numBitLevels)
   return this$static
 }
-
-function $Encode_2(this$static, rangeEncoder, symbol) {
-  var bit,
-    bitIndex,
-    m = 1
-  for (bitIndex = this$static.NumBitLevels; bitIndex != 0; ) {
+function $Encode_2(this$static: any, rangeEncoder: any, symbol: number): void {
+  let m = 1
+  for (let bitIndex = this$static.NumBitLevels; bitIndex != 0; ) {
     bitIndex -= 1
-    bit = (symbol >>> bitIndex) & 1
+    const bit = (symbol >>> bitIndex) & 1
     $Encode_3(rangeEncoder, this$static.Models, m, bit)
     m = (m << 1) | bit
   }
 }
-
-function $GetPrice_1(this$static, symbol) {
-  var bit,
-    bitIndex,
-    m = 1,
-    price = 0
-  for (bitIndex = this$static.NumBitLevels; bitIndex != 0; ) {
+function $GetPrice_1(this$static: any, symbol: number): number {
+  let m = 1
+  let price = 0
+  for (let bitIndex = this$static.NumBitLevels; bitIndex != 0; ) {
     bitIndex -= 1
-    bit = (symbol >>> bitIndex) & 1
+    const bit = (symbol >>> bitIndex) & 1
     price += GetPrice(this$static.Models[m], bit)
     m = (m << 1) + bit
   }
   return price
 }
-
-function $ReverseEncode(this$static, rangeEncoder, symbol) {
-  var bit,
-    i,
-    m = 1
-  for (i = 0; i < this$static.NumBitLevels; ++i) {
-    bit = symbol & 1
+function $ReverseEncode(
+  this$static: any,
+  rangeEncoder: any,
+  symbol: number,
+): void {
+  let m = 1
+  for (let i = 0; i < this$static.NumBitLevels; ++i) {
+    const bit = symbol & 1
     $Encode_3(rangeEncoder, this$static.Models, m, bit)
     m = (m << 1) | bit
     symbol >>= 1
   }
 }
-
-function $ReverseGetPrice(this$static, symbol) {
-  var bit,
-    i,
-    m = 1,
-    price = 0
-  for (i = this$static.NumBitLevels; i != 0; i -= 1) {
-    bit = symbol & 1
+function $ReverseGetPrice(this$static: any, symbol: number): number {
+  let m = 1
+  let price = 0
+  for (let i = this$static.NumBitLevels; i != 0; i -= 1) {
+    const bit = symbol & 1
     symbol >>>= 1
     price += GetPrice(this$static.Models[m], bit)
     m = (m << 1) | bit
   }
   return price
 }
-
-function ReverseEncode(Models, startIndex, rangeEncoder, NumBitLevels, symbol) {
-  var bit,
-    i,
-    m = 1
-  for (i = 0; i < NumBitLevels; ++i) {
-    bit = symbol & 1
-    $Encode_3(rangeEncoder, Models, startIndex + m, bit)
-    m = (m << 1) | bit
-    symbol >>= 1
-  }
+function ReverseEncode(
+  Models: number[],
+  startIndex: number,
+  rangeEncoder: any,
+  NumBitLevels: number,
+  symbol: number,
+): void {
+  BitTreeEncoder.reverseEncode(
+    Models,
+    startIndex,
+    rangeEncoder,
+    NumBitLevels,
+    symbol,
+  )
 }
-
-function ReverseGetPrice(Models, startIndex, NumBitLevels, symbol) {
-  var bit,
-    i,
-    m = 1,
-    price = 0
-  for (i = NumBitLevels; i != 0; i -= 1) {
-    bit = symbol & 1
-    symbol >>>= 1
-    price += ProbPrices[(((Models[startIndex + m] - bit) ^ -bit) & 2047) >>> 2]
-    m = (m << 1) | bit
-  }
-  return price
+function ReverseGetPrice(
+  Models: number[],
+  startIndex: number,
+  NumBitLevels: number,
+  symbol: number,
+): number {
+  return BitTreeEncoder.reverseGetPrice(
+    Models,
+    startIndex,
+    NumBitLevels,
+    symbol,
+  )
 }
 /** ce */
 /** ds */
@@ -3050,30 +3345,27 @@ function $Init_8(this$static) {
   }
 }
 /** de */
-
-function InitBitModels(probs) {
-  for (var i = probs.length - 1; i >= 0; --i) {
-    probs[i] = 1024
-  }
-}
 /** cs */
-var ProbPrices = (function () {
-  var end,
-    i,
-    j,
-    start,
-    ProbPrices: any[] = []
-  for (i = 8; i >= 0; --i) {
-    start = 1
-    start <<= 9 - i - 1
-    end = 1
-    end <<= 9 - i
-    for (j = start; j < end; ++j) {
-      ProbPrices[j] = (i << 6) + (((end - j) << 6) >>> (9 - i - 1))
+/**
+ * Probability price lookup table for range encoding
+ */
+class ProbPricesClass {
+  static readonly table: number[] = (() => {
+    const table: number[] = []
+    for (let i = 8; i >= 0; --i) {
+      let start = 1
+      start <<= 9 - i - 1
+      let end = 1
+      end <<= 9 - i
+      for (let j = start; j < end; ++j) {
+        table[j] = (i << 6) + (((end - j) << 6) >>> (9 - i - 1))
+      }
     }
-  }
-  return ProbPrices
-})()
+    return table
+  })()
+}
+
+const ProbPrices = ProbPricesClass.table
 
 function $Encode_3(this$static, probs, index, symbol) {
   var newBound,
@@ -3143,58 +3435,58 @@ function $ShiftLow(this$static) {
   this$static.Low = shl(and(this$static.Low, [16777215, 0]), 8)
 }
 
-function GetPrice(Prob, symbol) {
-  return ProbPrices[(((Prob - symbol) ^ -symbol) & 2047) >>> 2]
-}
-
 /** ce */
 /** ds */
-function decode(utf) {
-  var i = 0,
-    j = 0,
-    x,
-    y,
-    z,
-    l = utf.length,
-    buf: any[] = [],
-    charCodes: any[] = []
+/**
+ * Decode UTF-8 byte array to string, or return original if binary data
+ */
+function decode(utf: Uint8Array): string | Uint8Array {
+  let i = 0
+  let j = 0
+  let x: number
+  let y: number
+  let z: number
+  const l = utf.length
+  const buf: string[] = []
+  const charCodes: number[] = []
+
   for (; i < l; ++i, ++j) {
     x = utf[i] & 255
     if (!(x & 128)) {
       if (!x) {
-        /// It appears that this is binary data, so it cannot be converted to a string, so just send it back.
+        // It appears that this is binary data, so it cannot be converted to a string, so just send it back.
         return utf
       }
       charCodes[j] = x
     } else if ((x & 224) == 192) {
       if (i + 1 >= l) {
-        /// It appears that this is binary data, so it cannot be converted to a string, so just send it back.
+        // It appears that this is binary data, so it cannot be converted to a string, so just send it back.
         return utf
       }
       y = utf[++i] & 255
       if ((y & 192) != 128) {
-        /// It appears that this is binary data, so it cannot be converted to a string, so just send it back.
+        // It appears that this is binary data, so it cannot be converted to a string, so just send it back.
         return utf
       }
       charCodes[j] = ((x & 31) << 6) | (y & 63)
     } else if ((x & 240) == 224) {
       if (i + 2 >= l) {
-        /// It appears that this is binary data, so it cannot be converted to a string, so just send it back.
+        // It appears that this is binary data, so it cannot be converted to a string, so just send it back.
         return utf
       }
       y = utf[++i] & 255
       if ((y & 192) != 128) {
-        /// It appears that this is binary data, so it cannot be converted to a string, so just send it back.
+        // It appears that this is binary data, so it cannot be converted to a string, so just send it back.
         return utf
       }
       z = utf[++i] & 255
       if ((z & 192) != 128) {
-        /// It appears that this is binary data, so it cannot be converted to a string, so just send it back.
+        // It appears that this is binary data, so it cannot be converted to a string, so just send it back.
         return utf
       }
       charCodes[j] = ((x & 15) << 12) | ((y & 63) << 6) | (z & 63)
     } else {
-      /// It appears that this is binary data, so it cannot be converted to a string, so just send it back.
+      // It appears that this is binary data, so it cannot be converted to a string, so just send it back.
       return utf
     }
     if (j == 16383) {
@@ -3252,10 +3544,6 @@ function encode(s: any): any {
   return data
 }
 /** ce */
-
-function toDouble(a) {
-  return a[1] + a[0]
-}
 
 /** cs */
 export function compress(
