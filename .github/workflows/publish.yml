@@ -37,7 +37,7 @@ jobs:
           echo "Current version in package.json: $CURRENT_VERSION"
 
           # Get published version from npm (if it exists)
-          PUBLISHED_VERSION=$(npm view vite-plugin-native-modules version 2>/dev/null || echo "none")
+          PUBLISHED_VERSION=$(npm view lzma-web version 2>/dev/null || echo "none")
           echo "Published version on npm: $PUBLISHED_VERSION"
 
           # Compare versions
