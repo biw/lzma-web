@@ -830,6 +830,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^20.0.0":
+  version: 20.19.27
+  resolution: "@types/node@npm:20.19.27"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10c0/7599c24d80465c1aa6e29b53581fc20ad8862ff33e6eef31d05c1c706868476ee57319c89b802ea972dd4d64ce86d18020aa5344f851fb59b730ea509a63300f
+  languageName: node
+  linkType: hard
+
+"@types/whatwg-mimetype@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@types/whatwg-mimetype@npm:3.0.2"
+  checksum: 10c0/dad39d1e4abe760a0a963c84bbdbd26b1df0eb68aff83bdf6ecbb50ad781ead777f6906d19a87007790b750f7500a12e5624d31fc6a1529d14bd19b5c3a316d1
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/eslint-plugin@npm:8.46.2":
   version: 8.46.2
   resolution: "@typescript-eslint/eslint-plugin@npm:8.46.2"
@@ -2036,6 +2052,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"happy-dom@npm:^20.0.11":
+  version: 20.0.11
+  resolution: "happy-dom@npm:20.0.11"
+  dependencies:
+    "@types/node": "npm:^20.0.0"
+    "@types/whatwg-mimetype": "npm:^3.0.2"
+    whatwg-mimetype: "npm:^3.0.0"
+  checksum: 10c0/818c44630fdb73258d12932646ab966190953820e5d8d032bc6ef51d00d6400097a91d28e212483216898c87d645e1728ae577951256ad989f75da6f9c1f8792
+  languageName: node
+  linkType: hard
+
 "has-flag@npm:^4.0.0":
   version: 4.0.0
   resolution: "has-flag@npm:4.0.0"
@@ -2356,6 +2383,7 @@ __metadata:
     eslint: "npm:9.38.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
+    happy-dom: "npm:^20.0.11"
     prettier: "npm:^3.3.3"
     tsup: "npm:8.5.0"
     typescript: "npm:5.9.3"
@@ -3629,6 +3657,13 @@ __metadata:
   version: 4.0.2
   resolution: "webidl-conversions@npm:4.0.2"
   checksum: 10c0/def5c5ac3479286dffcb604547628b2e6b46c5c5b8a8cfaa8c71dc3bafc85859bde5fbe89467ff861f571ab38987cf6ab3d6e7c80b39b999e50e803c12f3164f
+  languageName: node
+  linkType: hard
+
+"whatwg-mimetype@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "whatwg-mimetype@npm:3.0.0"
+  checksum: 10c0/323895a1cda29a5fb0b9ca82831d2c316309fede0365047c4c323073e3239067a304a09a1f4b123b9532641ab604203f33a1403b5ca6a62ef405bcd7a204080f
   languageName: node
   linkType: hard
 
