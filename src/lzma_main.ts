@@ -563,7 +563,7 @@ function $MovePos_1(this$static) {
 function $ReadBlock(this$static) {
   var numReadBytes, pointerToPostion, size
   if (this$static._streamEndWasReached) return
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     size =
       -this$static._bufferOffset +
@@ -784,7 +784,7 @@ function $GetMatches(this$static, distances) {
     }
   }
   count = this$static._cutValue
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     if (curMatch <= matchMinPos || count == 0) {
       count -= 1
@@ -951,7 +951,7 @@ function $Skip(this$static, num) {
     ptr1 = this$static._cyclicBufferPos << 1
     len0 = len1 = this$static.kNumHashDirectBytes
     count = this$static._cutValue
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       if (curMatch <= matchMinPos || count == 0) {
         count -= 1
@@ -1690,7 +1690,7 @@ function $CodeOneBlock(this$static, inSize, outSize, finished) {
     $Flush(this$static, lowBits_0(this$static.nowPos64))
     return
   }
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     len = $GetOptimum(this$static, lowBits_0(this$static.nowPos64))
     pos = this$static.backRes
@@ -2234,7 +2234,7 @@ function $GetOptimum(this$static, position) {
     }
   }
   cur = 0
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     ++cur
     if (cur == lenEnd) {
