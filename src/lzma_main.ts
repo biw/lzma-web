@@ -304,7 +304,8 @@ function $ByteArrayInputStream(this$static: any, buf: any[]): any {
   this$static.pos = stream.pos
   this$static.count = stream.count
   this$static.read = () => stream.read()
-  this$static.readBytes = (b: any[], o: number, l: number) => stream.readBytes(b, o, l)
+  this$static.readBytes = (b: any[], o: number, l: number) =>
+    stream.readBytes(b, o, l)
   return this$static
 }
 /** ds */
