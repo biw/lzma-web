@@ -240,9 +240,9 @@ function toDouble(a: LongLit): number {
  * Simple byte array input stream
  */
 class ByteArrayInputStream {
-  private buf: any[]
-  private pos: number
-  private count: number
+  buf: any[]
+  pos: number
+  count: number
 
   constructor(buf: any[]) {
     this.buf = buf

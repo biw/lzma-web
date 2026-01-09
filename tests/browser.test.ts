@@ -65,9 +65,6 @@ class MockWorker {
   }
 }
 
-// Store original Worker
-const OriginalWorker = globalThis.Worker
-
 describe('Worker-based API (lzma.ts)', () => {
   beforeEach(() => {
     // Mock the Worker globally before importing lzma.ts
@@ -423,9 +420,6 @@ describe('Worker message handling edge cases', () => {
 
 describe('Worker.ts message handler', () => {
   test('worker handles compress action', async () => {
-    // Test the worker.ts message handler directly
-    const messageHandler = vi.fn()
-
     // Simulate what the worker does
     const action_compress = 1
     const testData = {
@@ -477,11 +471,9 @@ describe('Worker.ts message handler', () => {
 
 describe('Worker.ts module direct testing', () => {
   let capturedHandler: ((e: MessageEvent) => void) | null = null
-  let originalAddEventListener: typeof addEventListener
 
   beforeEach(() => {
     // Capture the message handler when worker.ts is imported
-    originalAddEventListener = globalThis.addEventListener
     vi.stubGlobal(
       'addEventListener',
       (type: string, handler: (e: MessageEvent) => void) => {
