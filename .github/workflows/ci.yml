@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Generate modules
+        run: yarn generate
+
       - name: Lint
         run: yarn lint
 
