@@ -21,5 +21,10 @@ export default defineConfig({
     outputFile: {
       json: './test-results.json',
     },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'json-summary', 'html'],
+      include: ['src/**/*.ts'],
+    },
   },
 })
