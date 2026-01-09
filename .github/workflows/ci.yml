@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+      - full-refactor
 
 jobs:
   lint-and-build:
