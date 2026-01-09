@@ -23,6 +23,26 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./sync": {
+      "types": "./dist/sync.d.ts",
+      "import": "./dist/sync.js",
+      "require": "./dist/sync.cjs"
+    },
+    "./worker": {
+      "types": "./dist/worker-api.d.ts",
+      "import": "./dist/worker-api.js",
+      "require": "./dist/worker-api.cjs"
+    },
+    "./compress": {
+      "types": "./dist/compress.d.ts",
+      "import": "./dist/compress.js",
+      "require": "./dist/compress.cjs"
+    },
+    "./decompress": {
+      "types": "./dist/decompress.d.ts",
+      "import": "./dist/decompress.js",
+      "require": "./dist/decompress.cjs"
     }
   },
   "files": [
@@ -31,10 +51,13 @@
   "devDependencies": {
     "@eslint/js": "^9.38.0",
     "@types/node": "22.18.0",
+    "@vitest/browser": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8",
     "@vitest/ui": "^2.1.8",
     "eslint": "9.38.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "playwright": "^1.57.0",
     "prettier": "^3.3.3",
     "tsup": "8.5.0",
     "typescript": "5.9.3",
@@ -43,12 +66,17 @@
     "vitest": "^2.1.8"
   },
   "scripts": {
+    "generate": "node scripts/generate-modules.js",
+    "prebuild": "yarn generate",
     "build": "tsup",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
     "test:perf": "node scripts/track-perf.js",
     "test:bench": "vitest bench",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "test:all": "vitest run && vitest run --config vitest.browser.config.ts",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'",
     "type-check": "tsc --noEmit",

@@ -39,8 +39,8 @@ export function display_result(str: string, pass: boolean): void {
 }
 
 export function compare(
-  a: string | Uint8Array | Buffer,
-  b: string | Uint8Array | Buffer,
+  a: string | Uint8Array | Buffer | number[],
+  b: string | Uint8Array | Buffer | number[],
 ): boolean {
   if (typeof a !== typeof b) {
     error('BAD TYPES:' + typeof a + ' !== ' + typeof b)

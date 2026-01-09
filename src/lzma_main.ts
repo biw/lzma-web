@@ -35,11 +35,18 @@ const P0_longLit: LongLit = [0, 0]
 const P1_longLit: LongLit = [1, 0]
 
 function update_progress(percent: number, cbn: number): void {
-  postMessage({
-    action: action_progress,
-    cbn: cbn,
-    result: percent,
-  })
+  // Only call postMessage if we're in a Worker context
+  if (
+    typeof cbn !== 'undefined' &&
+    typeof self !== 'undefined' &&
+    typeof self.postMessage === 'function'
+  ) {
+    self.postMessage({
+      action: action_progress,
+      cbn: cbn,
+      result: percent,
+    })
+  }
 }
 
 function initDim(len: number): any[] {
@@ -240,9 +247,9 @@ function toDouble(a: LongLit): number {
  * Simple byte array input stream
  */
 class ByteArrayInputStream {
-  private buf: any[]
-  private pos: number
-  private count: number
+  buf: any[]
+  pos: number
+  count: number
 
   constructor(buf: any[]) {
     this.buf = buf
@@ -250,14 +257,11 @@ class ByteArrayInputStream {
     this.count = buf.length
   }
 
-  /** ds */
   read(): number {
     if (this.pos >= this.count) return -1
     return this.buf[this.pos++] & 255
   }
-  /** de */
 
-  /** cs */
   readBytes(buf: any[], off: number, len: number): number {
     if (this.pos >= this.count) return -1
     len = Math.min(len, this.count - this.pos)
@@ -265,7 +269,6 @@ class ByteArrayInputStream {
     this.pos += len
     return len
   }
-  /** ce */
 }
 
 /**
@@ -285,11 +288,9 @@ class ByteArrayOutputStream {
     return new Uint8Array(data)
   }
 
-  /** cs */
   writeByte(b: number): void {
     this.buf[this.count++] = (b << 24) >> 24
   }
-  /** ce */
 
   writeBytes(buf: any[], off: number, len: number): void {
     arraycopy(buf, off, this.buf, this.count, len)
@@ -304,16 +305,16 @@ function $ByteArrayInputStream(this$static: any, buf: any[]): any {
   this$static.pos = stream.pos
   this$static.count = stream.count
   this$static.read = () => stream.read()
-  this$static.readBytes = (b: any[], o: number, l: number) => stream.readBytes(b, o, l)
+  this$static.readBytes = (b: any[], o: number, l: number) =>
+    stream.readBytes(b, o, l)
   return this$static
 }
-/** ds */
+
 function $read(this$static: any): number {
   if (this$static.pos >= this$static.count) return -1
   return this$static.buf[this$static.pos++] & 255
 }
-/** de */
-/** cs */
+
 function $read_0(
   this$static: any,
   buf: any[],
@@ -326,7 +327,6 @@ function $read_0(
   this$static.pos += len
   return len
 }
-/** ce */
 
 function $ByteArrayOutputStream(): ByteArrayOutputStream {
   return new ByteArrayOutputStream()
@@ -336,11 +336,9 @@ function $toByteArray(this$static: ByteArrayOutputStream): Uint8Array {
   return this$static.toByteArray()
 }
 
-/** cs */
 function $write(this$static: ByteArrayOutputStream, b: number): void {
   this$static.writeByte(b)
 }
-/** ce */
 
 function $write_0(
   this$static: ByteArrayOutputStream,
@@ -3582,13 +3580,18 @@ export function compress(
     on_finish_fn ||
     function (res: any, err: any) {
       if (typeof cbn == 'undefined') return
-
-      return postMessage({
-        action: action_compress,
-        cbn: cbn,
-        result: res,
-        error: err,
-      })
+      // Only call postMessage if we're in a Worker context
+      if (
+        typeof self !== 'undefined' &&
+        typeof self.postMessage === 'function'
+      ) {
+        return self.postMessage({
+          action: action_compress,
+          cbn: cbn,
+          result: res,
+          error: err,
+        })
+      }
     }
 
   if (sync) {
@@ -3683,13 +3686,18 @@ export function decompress(
     on_finish_fn ||
     function (res: any, err: any) {
       if (typeof cbn == 'undefined') return
-
-      return postMessage({
-        action: action_decompress,
-        cbn: cbn,
-        result: res,
-        error: err,
-      })
+      // Only call postMessage if we're in a Worker context
+      if (
+        typeof self !== 'undefined' &&
+        typeof self.postMessage === 'function'
+      ) {
+        return self.postMessage({
+          action: action_decompress,
+          cbn: cbn,
+          result: res,
+          error: err,
+        })
+      }
     }
 
   if (sync) {

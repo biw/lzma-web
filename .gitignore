@@ -3,6 +3,9 @@ coverage/
 todo
 dist/
 
+# Auto-generated modules (created by scripts/generate-modules.js)
+src/generated/
+
 # Test performance tracking
 test-results.json
 test-performance.csv

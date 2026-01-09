@@ -21,5 +21,23 @@ export default defineConfig({
     outputFile: {
       json: './test-results.json',
     },
+    // Coverage configuration
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov', 'json'],
+      reportsDirectory: './coverage',
+      include: ['src/**/*.ts'],
+      exclude: [
+        'src/generated/**',
+        'src/worker.ts', // Worker entry point
+      ],
+      // Thresholds (optional - uncomment to enforce)
+      // thresholds: {
+      //   lines: 80,
+      //   functions: 80,
+      //   branches: 80,
+      //   statements: 80,
+      // },
+    },
   },
 })
