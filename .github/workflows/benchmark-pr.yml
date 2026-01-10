@@ -29,31 +29,44 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Generate modules
+        run: yarn generate
+
       - name: Run benchmarks on PR branch
-        run: yarn test:bench --reporter=json --reporter=default > pr-bench.json
-        continue-on-error: true
+        id: pr-bench
+        run: yarn test:bench --reporter=json --reporter=default > pr-bench.json 2>&1 || true
 
       - name: Save PR benchmark results
         run: |
           if [ -f pr-bench.json ]; then
-            mv pr-bench.json pr-results.json
+            cp pr-bench.json /tmp/pr-results.json
           fi
 
       - name: Checkout main branch
         run: |
+          git stash --include-untracked || true
           git checkout origin/main
 
       - name: Install dependencies (main)
         run: yarn install --immutable
 
+      - name: Generate modules (main)
+        run: |
+          # Only run if generate script exists
+          if [ -f scripts/generate-modules.js ]; then
+            yarn generate
+          fi
+        continue-on-error: true
+
       - name: Run benchmarks on main branch
-        run: yarn test:bench --reporter=json --reporter=default > main-bench.json
+        id: main-bench
+        run: yarn test:bench --reporter=json --reporter=default > main-bench.json 2>&1 || true
         continue-on-error: true
 
       - name: Save main benchmark results
         run: |
           if [ -f main-bench.json ]; then
-            mv main-bench.json main-results.json
+            cp main-bench.json /tmp/main-results.json
           fi
 
       - name: Checkout PR branch again
@@ -62,9 +75,32 @@ jobs:
       - name: Install dependencies for comparison
         run: yarn install --immutable
 
+      - name: Restore benchmark results
+        run: |
+          if [ -f /tmp/pr-results.json ]; then
+            cp /tmp/pr-results.json pr-results.json
+          fi
+          if [ -f /tmp/main-results.json ]; then
+            cp /tmp/main-results.json main-results.json
+          fi
+
       - name: Compare benchmarks
         id: compare
-        run: node scripts/compare-benchmarks.js
+        run: |
+          if [ -f pr-results.json ] && [ -f main-results.json ]; then
+            node scripts/compare-benchmarks.js
+          else
+            echo "## 📊 Benchmark Comparison" > benchmark-comparison.md
+            echo "" >> benchmark-comparison.md
+            if [ ! -f pr-results.json ]; then
+              echo "⚠️ PR benchmarks did not produce results." >> benchmark-comparison.md
+            fi
+            if [ ! -f main-results.json ]; then
+              echo "⚠️ Main branch benchmarks did not produce results (this may be expected for new features)." >> benchmark-comparison.md
+            fi
+            echo "" >> benchmark-comparison.md
+            echo "Benchmarks will be fully comparable once this PR is merged and a baseline is established." >> benchmark-comparison.md
+          fi
         continue-on-error: true
 
       - name: Comment PR
@@ -79,7 +115,7 @@ jobs:
             if (fs.existsSync('benchmark-comparison.md')) {
               body = fs.readFileSync('benchmark-comparison.md', 'utf8');
             } else {
-              body = '⚠️ Benchmark comparison failed. Check the workflow logs for details.';
+              body = '⚠️ Benchmark comparison could not be generated. This may be expected if the main branch has a different structure.';
             }
 
             // Find existing benchmark comment
@@ -89,8 +125,8 @@ jobs:
               issue_number: context.issue.number,
             });
 
-            const benchmarkComment = comments.find(comment => 
-              comment.user.type === 'Bot' && 
+            const benchmarkComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
               comment.body.includes('📊 Benchmark Comparison')
             );
 
