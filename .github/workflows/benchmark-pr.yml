@@ -111,12 +111,18 @@ jobs:
           script: |
             const fs = require('fs');
 
+            const COMMENT_MARKER = '<!-- lzma-benchmark-comment -->';
+
             let body;
             if (fs.existsSync('benchmark-comparison.md')) {
               body = fs.readFileSync('benchmark-comparison.md', 'utf8');
             } else {
               body = '⚠️ Benchmark comparison could not be generated. This may be expected if the main branch has a different structure.';
             }
+
+            // Add marker and timestamp
+            const timestamp = new Date().toISOString();
+            body = `${COMMENT_MARKER}\n${body}\n\n<sub>Last updated: ${timestamp}</sub>`;
 
             // Find existing benchmark comment
             const { data: comments } = await github.rest.issues.listComments({
@@ -127,7 +133,7 @@ jobs:
 
             const benchmarkComment = comments.find(comment =>
               comment.user.type === 'Bot' &&
-              comment.body.includes('📊 Benchmark Comparison')
+              comment.body.includes(COMMENT_MARKER)
             );
 
             if (benchmarkComment) {
