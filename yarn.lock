@@ -75,6 +75,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@emnapi/core@npm:^1.7.1":
+  version: 1.8.1
+  resolution: "@emnapi/core@npm:1.8.1"
+  dependencies:
+    "@emnapi/wasi-threads": "npm:1.1.0"
+    tslib: "npm:^2.4.0"
+  checksum: 10c0/2c242f4b49779bac403e1cbcc98edacdb1c8ad36562408ba9a20663824669e930bc8493be46a2522d9dc946b8d96cd7073970bae914928c7671b5221c85b432e
+  languageName: node
+  linkType: hard
+
+"@emnapi/runtime@npm:^1.7.1":
+  version: 1.8.1
+  resolution: "@emnapi/runtime@npm:1.8.1"
+  dependencies:
+    tslib: "npm:^2.4.0"
+  checksum: 10c0/f4929d75e37aafb24da77d2f58816761fe3f826aad2e37fa6d4421dac9060cbd5098eea1ac3c9ecc4526b89deb58153852fa432f87021dc57863f2ff726d713f
+  languageName: node
+  linkType: hard
+
+"@emnapi/wasi-threads@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@emnapi/wasi-threads@npm:1.1.0"
+  dependencies:
+    tslib: "npm:^2.4.0"
+  checksum: 10c0/e6d54bf2b1e64cdd83d2916411e44e579b6ae35d5def0dea61a3c452d9921373044dff32a8b8473ae60c80692bdc39323e98b96a3f3d87ba6886b24dd0ef7ca1
+  languageName: node
+  linkType: hard
+
 "@esbuild/aix-ppc64@npm:0.21.5":
   version: 0.21.5
   resolution: "@esbuild/aix-ppc64@npm:0.21.5"
@@ -677,6 +705,198 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@napi-rs/lzma-android-arm-eabi@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-android-arm-eabi@npm:1.4.5"
+  conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-android-arm64@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-android-arm64@npm:1.4.5"
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-darwin-arm64@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-darwin-arm64@npm:1.4.5"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-darwin-x64@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-darwin-x64@npm:1.4.5"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-freebsd-x64@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-freebsd-x64@npm:1.4.5"
+  conditions: os=freebsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-linux-arm-gnueabihf@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-linux-arm-gnueabihf@npm:1.4.5"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-linux-arm64-gnu@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-linux-arm64-gnu@npm:1.4.5"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-linux-arm64-musl@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-linux-arm64-musl@npm:1.4.5"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-linux-ppc64-gnu@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-linux-ppc64-gnu@npm:1.4.5"
+  conditions: os=linux & cpu=ppc64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-linux-riscv64-gnu@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-linux-riscv64-gnu@npm:1.4.5"
+  conditions: os=linux & cpu=riscv64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-linux-s390x-gnu@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-linux-s390x-gnu@npm:1.4.5"
+  conditions: os=linux & cpu=s390x & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-linux-x64-gnu@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-linux-x64-gnu@npm:1.4.5"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-linux-x64-musl@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-linux-x64-musl@npm:1.4.5"
+  conditions: os=linux & cpu=x64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-wasm32-wasi@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-wasm32-wasi@npm:1.4.5"
+  dependencies:
+    "@napi-rs/wasm-runtime": "npm:^1.0.3"
+  conditions: cpu=wasm32
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-win32-arm64-msvc@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-win32-arm64-msvc@npm:1.4.5"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-win32-ia32-msvc@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-win32-ia32-msvc@npm:1.4.5"
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma-win32-x64-msvc@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma-win32-x64-msvc@npm:1.4.5"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@napi-rs/lzma@npm:^1.4.5":
+  version: 1.4.5
+  resolution: "@napi-rs/lzma@npm:1.4.5"
+  dependencies:
+    "@napi-rs/lzma-android-arm-eabi": "npm:1.4.5"
+    "@napi-rs/lzma-android-arm64": "npm:1.4.5"
+    "@napi-rs/lzma-darwin-arm64": "npm:1.4.5"
+    "@napi-rs/lzma-darwin-x64": "npm:1.4.5"
+    "@napi-rs/lzma-freebsd-x64": "npm:1.4.5"
+    "@napi-rs/lzma-linux-arm-gnueabihf": "npm:1.4.5"
+    "@napi-rs/lzma-linux-arm64-gnu": "npm:1.4.5"
+    "@napi-rs/lzma-linux-arm64-musl": "npm:1.4.5"
+    "@napi-rs/lzma-linux-ppc64-gnu": "npm:1.4.5"
+    "@napi-rs/lzma-linux-riscv64-gnu": "npm:1.4.5"
+    "@napi-rs/lzma-linux-s390x-gnu": "npm:1.4.5"
+    "@napi-rs/lzma-linux-x64-gnu": "npm:1.4.5"
+    "@napi-rs/lzma-linux-x64-musl": "npm:1.4.5"
+    "@napi-rs/lzma-wasm32-wasi": "npm:1.4.5"
+    "@napi-rs/lzma-win32-arm64-msvc": "npm:1.4.5"
+    "@napi-rs/lzma-win32-ia32-msvc": "npm:1.4.5"
+    "@napi-rs/lzma-win32-x64-msvc": "npm:1.4.5"
+  dependenciesMeta:
+    "@napi-rs/lzma-android-arm-eabi":
+      optional: true
+    "@napi-rs/lzma-android-arm64":
+      optional: true
+    "@napi-rs/lzma-darwin-arm64":
+      optional: true
+    "@napi-rs/lzma-darwin-x64":
+      optional: true
+    "@napi-rs/lzma-freebsd-x64":
+      optional: true
+    "@napi-rs/lzma-linux-arm-gnueabihf":
+      optional: true
+    "@napi-rs/lzma-linux-arm64-gnu":
+      optional: true
+    "@napi-rs/lzma-linux-arm64-musl":
+      optional: true
+    "@napi-rs/lzma-linux-ppc64-gnu":
+      optional: true
+    "@napi-rs/lzma-linux-riscv64-gnu":
+      optional: true
+    "@napi-rs/lzma-linux-s390x-gnu":
+      optional: true
+    "@napi-rs/lzma-linux-x64-gnu":
+      optional: true
+    "@napi-rs/lzma-linux-x64-musl":
+      optional: true
+    "@napi-rs/lzma-wasm32-wasi":
+      optional: true
+    "@napi-rs/lzma-win32-arm64-msvc":
+      optional: true
+    "@napi-rs/lzma-win32-ia32-msvc":
+      optional: true
+    "@napi-rs/lzma-win32-x64-msvc":
+      optional: true
+  checksum: 10c0/df098c99f904b54541e3a34feeb5878c98a4abf1ababf1d301d903b99d98402fff5eda49e1dd103bb4bf44a9217a5e1b17fb30b74044416561f8fe02ca098ee3
+  languageName: node
+  linkType: hard
+
+"@napi-rs/wasm-runtime@npm:^1.0.3":
+  version: 1.1.1
+  resolution: "@napi-rs/wasm-runtime@npm:1.1.1"
+  dependencies:
+    "@emnapi/core": "npm:^1.7.1"
+    "@emnapi/runtime": "npm:^1.7.1"
+    "@tybys/wasm-util": "npm:^0.10.1"
+  checksum: 10c0/04d57b67e80736e41fe44674a011878db0a8ad893f4d44abb9d3608debb7c174224cba2796ed5b0c1d367368159f3ca6be45f1c59222f70e32ddc880f803d447
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -925,6 +1145,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sarakusha/lzma@npm:^2.3.4":
+  version: 2.3.4
+  resolution: "@sarakusha/lzma@npm:2.3.4"
+  bin:
+    lzma.js: bin/lzma.js
+  checksum: 10c0/4c4df18730f88027df74d53abd949f486d55430f3f66e6023d61aee0aace2186218ebeff197641e8d67aca4894ea81f3d8dd9313d9ae4effcbc997100d88a1b1
+  languageName: node
+  linkType: hard
+
 "@testing-library/dom@npm:^10.4.0":
   version: 10.4.1
   resolution: "@testing-library/dom@npm:10.4.1"
@@ -947,6 +1176,15 @@ __metadata:
   peerDependencies:
     "@testing-library/dom": ">=7.21.4"
   checksum: 10c0/75fea130a52bf320d35d46ed54f3eec77e71a56911b8b69a3fe29497b0b9947b2dc80d30f04054ad4ce7f577856ae3e5397ea7dff0ef14944d3909784c7a93fe
+  languageName: node
+  linkType: hard
+
+"@tybys/wasm-util@npm:^0.10.1":
+  version: 0.10.1
+  resolution: "@tybys/wasm-util@npm:0.10.1"
+  dependencies:
+    tslib: "npm:^2.4.0"
+  checksum: 10c0/b255094f293794c6d2289300c5fbcafbb5532a3aed3a5ffd2f8dc1828e639b88d75f6a376dd8f94347a44813fd7a7149d8463477a9a49525c8b2dcaa38c2d1e8
   languageName: node
   linkType: hard
 
@@ -2451,6 +2689,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"inherits@npm:^2.0.3":
+  version: 2.0.4
+  resolution: "inherits@npm:2.0.4"
+  checksum: 10c0/4e531f648b29039fb7426fb94075e6545faa1eb9fe83c29f0b6d9e7263aceb4289d2d4557db0d428188eeb449cc7c5e77b0a0b2c4e248ff2a65933a0dee49ef2
+  languageName: node
+  linkType: hard
+
 "ip-address@npm:^10.0.1":
   version: 10.0.1
   resolution: "ip-address@npm:10.0.1"
@@ -2702,11 +2947,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lzma-native@npm:^8.0.6":
+  version: 8.0.6
+  resolution: "lzma-native@npm:8.0.6"
+  dependencies:
+    node-addon-api: "npm:^3.1.0"
+    node-gyp: "npm:latest"
+    node-gyp-build: "npm:^4.2.1"
+    readable-stream: "npm:^3.6.0"
+  bin:
+    lzmajs: bin/lzmajs
+  checksum: 10c0/ff469a29de753445097dabf88ca1a332e47ead39204480b6323472d716657d97c7e3adf68437e54142277c55d4f19d96b49d14553cbf07977cb84833f73e9b6a
+  languageName: node
+  linkType: hard
+
 "lzma-web@workspace:.":
   version: 0.0.0-use.local
   resolution: "lzma-web@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.38.0"
+    "@napi-rs/lzma": "npm:^1.4.5"
+    "@sarakusha/lzma": "npm:^2.3.4"
     "@types/node": "npm:22.18.0"
     "@vitest/browser": "npm:^2.1.8"
     "@vitest/coverage-v8": "npm:^2.1.8"
@@ -2715,6 +2976,8 @@ __metadata:
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-prettier: "npm:^5.2.1"
     happy-dom: "npm:^20.0.11"
+    lzma: "npm:^2.3.2"
+    lzma-native: "npm:^8.0.6"
     playwright: "npm:^1.57.0"
     prettier: "npm:^3.3.3"
     tsup: "npm:8.5.0"
@@ -2724,6 +2987,15 @@ __metadata:
     vitest: "npm:^2.1.8"
   languageName: unknown
   linkType: soft
+
+"lzma@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "lzma@npm:2.3.2"
+  bin:
+    lzma.js: bin/lzma.js
+  checksum: 10c0/80650ae54e9216bec16850f20bd1af2ab5f2c4ffa6b598fece0fedd5304c5d76671b50c254e7e1a843e0612885c7b7f24311bfb9bc765673935a354764cc8064
+  languageName: node
+  linkType: hard
 
 "magic-string@npm:^0.30.12, magic-string@npm:^0.30.17":
   version: 0.30.21
@@ -2988,6 +3260,26 @@ __metadata:
   version: 1.0.0
   resolution: "negotiator@npm:1.0.0"
   checksum: 10c0/4c559dd52669ea48e1914f9d634227c561221dd54734070791f999c52ed0ff36e437b2e07d5c1f6e32909fc625fe46491c16e4a8f0572567d4dd15c3a4fda04b
+  languageName: node
+  linkType: hard
+
+"node-addon-api@npm:^3.1.0":
+  version: 3.2.1
+  resolution: "node-addon-api@npm:3.2.1"
+  dependencies:
+    node-gyp: "npm:latest"
+  checksum: 10c0/41f21c9d12318875a2c429befd06070ce367065a3ef02952cfd4ea17ef69fa14012732f510b82b226e99c254da8d671847ea018cad785f839a5366e02dd56302
+  languageName: node
+  linkType: hard
+
+"node-gyp-build@npm:^4.2.1":
+  version: 4.8.4
+  resolution: "node-gyp-build@npm:4.8.4"
+  bin:
+    node-gyp-build: bin.js
+    node-gyp-build-optional: optional.js
+    node-gyp-build-test: build-test.js
+  checksum: 10c0/444e189907ece2081fe60e75368784f7782cfddb554b60123743dfb89509df89f1f29c03bbfa16b3a3e0be3f48799a4783f487da6203245fa5bed239ba7407e1
   languageName: node
   linkType: hard
 
@@ -3314,6 +3606,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"readable-stream@npm:^3.6.0":
+  version: 3.6.2
+  resolution: "readable-stream@npm:3.6.2"
+  dependencies:
+    inherits: "npm:^2.0.3"
+    string_decoder: "npm:^1.1.1"
+    util-deprecate: "npm:^1.0.1"
+  checksum: 10c0/e37be5c79c376fdd088a45fa31ea2e423e5d48854be7a22a58869b4e84d25047b193f6acb54f1012331e1bcd667ffb569c01b99d36b0bd59658fb33f513511b7
+  languageName: node
+  linkType: hard
+
 "readdirp@npm:^4.0.1":
   version: 4.1.2
   resolution: "readdirp@npm:4.1.2"
@@ -3450,6 +3753,13 @@ __metadata:
   dependencies:
     queue-microtask: "npm:^1.2.2"
   checksum: 10c0/200b5ab25b5b8b7113f9901bfe3afc347e19bb7475b267d55ad0eb86a62a46d77510cb0f232507c9e5d497ebda569a08a9867d0d14f57a82ad5564d991588b39
+  languageName: node
+  linkType: hard
+
+"safe-buffer@npm:~5.2.0":
+  version: 5.2.1
+  resolution: "safe-buffer@npm:5.2.1"
+  checksum: 10c0/6501914237c0a86e9675d4e51d89ca3c21ffd6a31642efeba25ad65720bce6921c9e7e974e5be91a786b25aa058b5303285d3c15dbabf983a919f5f630d349f3
   languageName: node
   linkType: hard
 
@@ -3621,6 +3931,15 @@ __metadata:
     emoji-regex: "npm:^9.2.2"
     strip-ansi: "npm:^7.0.1"
   checksum: 10c0/ab9c4264443d35b8b923cbdd513a089a60de339216d3b0ed3be3ba57d6880e1a192b70ae17225f764d7adbf5994e9bb8df253a944736c15a0240eff553c678ca
+  languageName: node
+  linkType: hard
+
+"string_decoder@npm:^1.1.1":
+  version: 1.3.0
+  resolution: "string_decoder@npm:1.3.0"
+  dependencies:
+    safe-buffer: "npm:~5.2.0"
+  checksum: 10c0/810614ddb030e271cd591935dcd5956b2410dd079d64ff92a1844d6b7588bf992b3e1b69b0f4d34a3e06e0bd73046ac646b5264c1987b20d0601f81ef35d731d
   languageName: node
   linkType: hard
 
@@ -3856,6 +4175,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:^2.4.0":
+  version: 2.8.1
+  resolution: "tslib@npm:2.8.1"
+  checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
+  languageName: node
+  linkType: hard
+
 "tsup@npm:8.5.0":
   version: 8.5.0
   resolution: "tsup@npm:8.5.0"
@@ -4003,6 +4329,13 @@ __metadata:
   dependencies:
     punycode: "npm:^2.1.0"
   checksum: 10c0/4ef57b45aa820d7ac6496e9208559986c665e49447cb072744c13b66925a362d96dd5a46c4530a6b8e203e5db5fe849369444440cb22ecfc26c679359e5dfa3c
+  languageName: node
+  linkType: hard
+
+"util-deprecate@npm:^1.0.1":
+  version: 1.0.2
+  resolution: "util-deprecate@npm:1.0.2"
+  checksum: 10c0/41a5bdd214df2f6c3ecf8622745e4a366c4adced864bc3c833739791aeeeb1838119af7daed4ba36428114b5c67dcda034a79c882e97e43c03e66a4dd7389942
   languageName: node
   linkType: hard
 
