@@ -1,5 +1,14 @@
 export type CompressMode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
+/**
+ * Callback invoked when compression/decompression completes.
+ *
+ * On success: result contains the data, error is null
+ * On failure: result is null, error contains the Error object
+ *
+ * Note: For successful decompression, result is string if the data is valid UTF-8,
+ * otherwise it's a Uint8Array for binary data.
+ */
 export type OnFinishCallback = (
   result: Uint8Array | string | null,
   error: Error | null,

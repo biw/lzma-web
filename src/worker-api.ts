@@ -16,7 +16,7 @@ const ACTION_PROGRESS = 3
 interface WorkerMessage {
   action: number
   cbn: number
-  result?: Uint8Array | string
+  result?: Uint8Array | string | number  // number is used for progress updates
   error?: Error
 }
 
@@ -64,8 +64,10 @@ export function createWorkerLZMA(): WorkerLZMA {
       )
     }
 
-    // Lazy initialization - only create Worker when first needed
-    // Use .ts extension in development (Vite handles it), .js in production
+    // Detect development vs production environment for worker file extension
+    // - In Vite dev mode: URLs end with .ts or contain /@fs/ (Vite's file system route)
+    // - In production: bundled files use .js extension
+    // Note: This heuristic works with Vite/Rollup. Other bundlers may need adjustment.
     const workerFile =
       import.meta.url.endsWith('.ts') || import.meta.url.includes('/@fs/')
         ? './worker.ts'
