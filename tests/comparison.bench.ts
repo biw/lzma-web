@@ -14,7 +14,10 @@ import path from 'path'
 import url from 'url'
 
 // lzma-web imports
-import { compress as lzmaWebCompress, decompress as lzmaWebDecompress } from '../src/index.js'
+import {
+  compress as lzmaWebCompress,
+  decompress as lzmaWebDecompress,
+} from '../src/index.js'
 import { compressSync, decompressSync } from '../src/sync.js'
 import { createWorkerLZMA } from '../src/worker-api.js'
 
@@ -28,9 +31,17 @@ const largeTextPath = path.join(pathToFiles, 'large-kjv.txt')
 const binaryPath = path.join(pathToFiles, 'binary')
 
 // Load test files
-const smallText = fs.existsSync(smallTextPath) ? fs.readFileSync(smallTextPath, 'utf-8') : 'Hello, World! '.repeat(100)
-const largeText = fs.existsSync(largeTextPath) ? fs.readFileSync(largeTextPath, 'utf-8') : 'Large text content '.repeat(10000)
-const binaryData = fs.existsSync(binaryPath) ? fs.readFileSync(binaryPath) : Buffer.from(Array.from({ length: 500 }, () => Math.floor(Math.random() * 256)))
+const smallText = fs.existsSync(smallTextPath)
+  ? fs.readFileSync(smallTextPath, 'utf-8')
+  : 'Hello, World! '.repeat(100)
+const largeText = fs.existsSync(largeTextPath)
+  ? fs.readFileSync(largeTextPath, 'utf-8')
+  : 'Large text content '.repeat(10000)
+const binaryData = fs.existsSync(binaryPath)
+  ? fs.readFileSync(binaryPath)
+  : Buffer.from(
+      Array.from({ length: 500 }, () => Math.floor(Math.random() * 256)),
+    )
 
 // Pre-compress data for decompression benchmarks
 let smallTextCompressed: Uint8Array
@@ -54,23 +65,30 @@ const hasWorkers = typeof Worker !== 'undefined'
 let sarakushaLzma: { compress: Function; decompress: Function } | null = null
 try {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const module = await import('@sarakusha/lzma') as any
+  const module = (await import('@sarakusha/lzma')) as any
   // @sarakusha/lzma exports compress/decompress directly
   if (typeof module.compress === 'function') {
     sarakushaLzma = {
       compress: (data: string | Uint8Array, mode: number) =>
         new Promise((resolve, reject) => {
-          module.compress(data, mode, (result: Uint8Array | null, error: Error | null) => {
-            if (error) reject(error)
-            else resolve(result)
-          })
+          module.compress(
+            data,
+            mode,
+            (result: Uint8Array | null, error: Error | null) => {
+              if (error) reject(error)
+              else resolve(result)
+            },
+          )
         }),
       decompress: (data: Uint8Array) =>
         new Promise((resolve, reject) => {
-          module.decompress(data, (result: string | Uint8Array | null, error: Error | null) => {
-            if (error) reject(error)
-            else resolve(result)
-          })
+          module.decompress(
+            data,
+            (result: string | Uint8Array | null, error: Error | null) => {
+              if (error) reject(error)
+              else resolve(result)
+            },
+          )
         }),
     }
   }
@@ -83,7 +101,7 @@ try {
 let originalLzma: { compress: Function; decompress: Function } | null = null
 try {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const module = await import('lzma') as any
+  const module = (await import('lzma')) as any
   // lzma package exports LZMA class as default
   const LZMAClass = module.default || module.LZMA
   if (typeof LZMAClass === 'function') {
@@ -91,17 +109,24 @@ try {
     originalLzma = {
       compress: (data: string | Uint8Array, mode: number) =>
         new Promise((resolve, reject) => {
-          lzma.compress(data, mode, (result: Uint8Array | null, error: Error | null) => {
-            if (error) reject(error)
-            else resolve(result)
-          })
+          lzma.compress(
+            data,
+            mode,
+            (result: Uint8Array | null, error: Error | null) => {
+              if (error) reject(error)
+              else resolve(result)
+            },
+          )
         }),
       decompress: (data: Uint8Array) =>
         new Promise((resolve, reject) => {
-          lzma.decompress(data, (result: string | Uint8Array | null, error: Error | null) => {
-            if (error) reject(error)
-            else resolve(result)
-          })
+          lzma.decompress(
+            data,
+            (result: string | Uint8Array | null, error: Error | null) => {
+              if (error) reject(error)
+              else resolve(result)
+            },
+          )
         }),
     }
   }
@@ -153,7 +178,7 @@ describe('lzma-web Execution Modes - Small Text Compression', () => {
     () => {
       compressSync(smallText, LZMA_MODE)
     },
-    benchOptions
+    benchOptions,
   )
 
   bench(
@@ -161,7 +186,7 @@ describe('lzma-web Execution Modes - Small Text Compression', () => {
     async () => {
       await lzmaWebCompress(smallText, LZMA_MODE)
     },
-    benchOptions
+    benchOptions,
   )
 
   if (hasWorkers) {
@@ -175,7 +200,7 @@ describe('lzma-web Execution Modes - Small Text Compression', () => {
           worker.terminate()
         }
       },
-      benchOptions
+      benchOptions,
     )
   }
 })
@@ -186,7 +211,7 @@ describe('lzma-web Execution Modes - Small Text Decompression', () => {
     () => {
       decompressSync(smallTextCompressed)
     },
-    benchOptions
+    benchOptions,
   )
 
   bench(
@@ -194,7 +219,7 @@ describe('lzma-web Execution Modes - Small Text Decompression', () => {
     async () => {
       await lzmaWebDecompress(smallTextCompressed)
     },
-    benchOptions
+    benchOptions,
   )
 
   if (hasWorkers) {
@@ -208,7 +233,7 @@ describe('lzma-web Execution Modes - Small Text Decompression', () => {
           worker.terminate()
         }
       },
-      benchOptions
+      benchOptions,
     )
   }
 })
@@ -223,7 +248,7 @@ describe('lzma-web Execution Modes - Large Text Compression', () => {
     () => {
       compressSync(largeText, LZMA_MODE)
     },
-    benchOptions
+    benchOptions,
   )
 
   bench(
@@ -231,7 +256,7 @@ describe('lzma-web Execution Modes - Large Text Compression', () => {
     async () => {
       await lzmaWebCompress(largeText, LZMA_MODE)
     },
-    benchOptions
+    benchOptions,
   )
 
   if (hasWorkers) {
@@ -245,7 +270,7 @@ describe('lzma-web Execution Modes - Large Text Compression', () => {
           worker.terminate()
         }
       },
-      benchOptions
+      benchOptions,
     )
   }
 })
@@ -256,7 +281,7 @@ describe('lzma-web Execution Modes - Large Text Decompression', () => {
     () => {
       decompressSync(largeTextCompressed)
     },
-    benchOptions
+    benchOptions,
   )
 
   bench(
@@ -264,7 +289,7 @@ describe('lzma-web Execution Modes - Large Text Decompression', () => {
     async () => {
       await lzmaWebDecompress(largeTextCompressed)
     },
-    benchOptions
+    benchOptions,
   )
 
   if (hasWorkers) {
@@ -278,7 +303,7 @@ describe('lzma-web Execution Modes - Large Text Decompression', () => {
           worker.terminate()
         }
       },
-      benchOptions
+      benchOptions,
     )
   }
 })
@@ -293,7 +318,7 @@ describe('LZMA Library Comparison - Small Text Compression', () => {
     () => {
       compressSync(smallText, LZMA_MODE)
     },
-    benchOptions
+    benchOptions,
   )
 
   if (sarakushaLzma) {
@@ -302,7 +327,7 @@ describe('LZMA Library Comparison - Small Text Compression', () => {
       async () => {
         await sarakushaLzma!.compress(smallText, LZMA_MODE)
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -312,7 +337,7 @@ describe('LZMA Library Comparison - Small Text Compression', () => {
       async () => {
         await originalLzma!.compress(smallText, LZMA_MODE)
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -322,7 +347,7 @@ describe('LZMA Library Comparison - Small Text Compression', () => {
       async () => {
         await napiLzma!.compress(Buffer.from(smallText))
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -332,7 +357,7 @@ describe('LZMA Library Comparison - Small Text Compression', () => {
       async () => {
         await lzmaNative!.compress(smallText)
       },
-      benchOptions
+      benchOptions,
     )
   }
 })
@@ -347,7 +372,7 @@ describe('LZMA Library Comparison - Large Text Compression', () => {
     () => {
       compressSync(largeText, LZMA_MODE)
     },
-    benchOptions
+    benchOptions,
   )
 
   if (sarakushaLzma) {
@@ -356,7 +381,7 @@ describe('LZMA Library Comparison - Large Text Compression', () => {
       async () => {
         await sarakushaLzma!.compress(largeText, LZMA_MODE)
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -366,7 +391,7 @@ describe('LZMA Library Comparison - Large Text Compression', () => {
       async () => {
         await originalLzma!.compress(largeText, LZMA_MODE)
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -376,7 +401,7 @@ describe('LZMA Library Comparison - Large Text Compression', () => {
       async () => {
         await napiLzma!.compress(Buffer.from(largeText))
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -386,7 +411,7 @@ describe('LZMA Library Comparison - Large Text Compression', () => {
       async () => {
         await lzmaNative!.compress(largeText)
       },
-      benchOptions
+      benchOptions,
     )
   }
 })
@@ -401,7 +426,7 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
     () => {
       decompressSync(smallTextCompressed)
     },
-    benchOptions
+    benchOptions,
   )
 
   if (sarakushaLzma) {
@@ -410,7 +435,7 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
       async () => {
         await sarakushaLzma!.decompress(smallTextCompressed)
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -420,7 +445,7 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
       async () => {
         await originalLzma!.decompress(smallTextCompressed)
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -430,7 +455,7 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
       async () => {
         await napiLzma!.decompress(Buffer.from(smallTextCompressed))
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -440,7 +465,7 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
       async () => {
         await lzmaNative!.decompress(Buffer.from(smallTextCompressed))
       },
-      benchOptions
+      benchOptions,
     )
   }
 })
@@ -455,7 +480,7 @@ describe('LZMA Library Comparison - Large Text Decompression', () => {
     () => {
       decompressSync(largeTextCompressed)
     },
-    benchOptions
+    benchOptions,
   )
 
   if (sarakushaLzma) {
@@ -464,7 +489,7 @@ describe('LZMA Library Comparison - Large Text Decompression', () => {
       async () => {
         await sarakushaLzma!.decompress(largeTextCompressed)
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -474,7 +499,7 @@ describe('LZMA Library Comparison - Large Text Decompression', () => {
       async () => {
         await originalLzma!.decompress(largeTextCompressed)
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -484,7 +509,7 @@ describe('LZMA Library Comparison - Large Text Decompression', () => {
       async () => {
         await napiLzma!.decompress(Buffer.from(largeTextCompressed))
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -494,7 +519,7 @@ describe('LZMA Library Comparison - Large Text Decompression', () => {
       async () => {
         await lzmaNative!.decompress(Buffer.from(largeTextCompressed))
       },
-      benchOptions
+      benchOptions,
     )
   }
 })
@@ -509,7 +534,7 @@ describe('LZMA Library Comparison - Binary Data Compression', () => {
     () => {
       compressSync(binaryData, LZMA_MODE)
     },
-    benchOptions
+    benchOptions,
   )
 
   if (napiLzma) {
@@ -518,7 +543,7 @@ describe('LZMA Library Comparison - Binary Data Compression', () => {
       async () => {
         await napiLzma!.compress(binaryData)
       },
-      benchOptions
+      benchOptions,
     )
   }
 
@@ -528,7 +553,7 @@ describe('LZMA Library Comparison - Binary Data Compression', () => {
       async () => {
         await lzmaNative!.compress(binaryData)
       },
-      benchOptions
+      benchOptions,
     )
   }
 })
@@ -548,11 +573,19 @@ describe('LZMA Compression Ratio by Mode', () => {
       const mode5 = compressSync(largeText, 5)
       const mode9 = compressSync(largeText, 9)
 
-      console.log(`\nCompression Ratios for large-kjv.txt (${(originalSize / 1024).toFixed(0)} KB):`)
-      console.log(`  Mode 1: ${((mode1.length / originalSize) * 100).toFixed(1)}% (${(mode1.length / 1024).toFixed(0)} KB)`)
-      console.log(`  Mode 5: ${((mode5.length / originalSize) * 100).toFixed(1)}% (${(mode5.length / 1024).toFixed(0)} KB)`)
-      console.log(`  Mode 9: ${((mode9.length / originalSize) * 100).toFixed(1)}% (${(mode9.length / 1024).toFixed(0)} KB)`)
+      console.log(
+        `\nCompression Ratios for large-kjv.txt (${(originalSize / 1024).toFixed(0)} KB):`,
+      )
+      console.log(
+        `  Mode 1: ${((mode1.length / originalSize) * 100).toFixed(1)}% (${(mode1.length / 1024).toFixed(0)} KB)`,
+      )
+      console.log(
+        `  Mode 5: ${((mode5.length / originalSize) * 100).toFixed(1)}% (${(mode5.length / 1024).toFixed(0)} KB)`,
+      )
+      console.log(
+        `  Mode 9: ${((mode9.length / originalSize) * 100).toFixed(1)}% (${(mode9.length / 1024).toFixed(0)} KB)`,
+      )
     },
-    { iterations: 1, time: 1000 }
+    { iterations: 1, time: 1000 },
   )
 })
