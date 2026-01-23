@@ -16,7 +16,7 @@ const ACTION_PROGRESS = 3
 interface WorkerMessage {
   action: number
   cbn: number
-  result?: Uint8Array | string | number  // number is used for progress updates
+  result?: Uint8Array | string | number // number is used for progress updates
   error?: Error
 }
 

@@ -14,7 +14,7 @@ addEventListener('message', (e: MessageEvent) => {
     self.postMessage({
       action: e.data?.action,
       cbn: e.data?.cbn,
-      error: error instanceof Error ? error : new Error(String(error))
+      error: error instanceof Error ? error : new Error(String(error)),
     })
   }
 })
