@@ -94,7 +94,11 @@ export function createWorkerLZMA(): WorkerLZMA {
           pending.reject(
             error instanceof Error ? error : new Error(String(error)),
           )
-        } else if (result !== undefined && result !== null) {
+        } else if (
+          result !== undefined &&
+          result !== null &&
+          typeof result !== 'number'
+        ) {
           pending.resolve(result)
         } else {
           pending.reject(new Error('Operation failed: no result returned'))
