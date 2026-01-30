@@ -37,6 +37,14 @@ describe('Worker API', () => {
       expect(result).toBeInstanceOf(Uint8Array)
     })
 
+    test('compresses ArrayBuffer input', async () => {
+      const buffer = new ArrayBuffer(10)
+      const view = new Uint8Array(buffer)
+      view.set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+      const result = await lzma.compress(buffer, 1)
+      expect(result).toBeInstanceOf(Uint8Array)
+    })
+
     test('worker is created after first operation', async () => {
       expect(lzma.worker).toBeNull()
       await lzma.compress('test', 1)
@@ -130,6 +138,17 @@ describe('Worker API', () => {
       const progressValues: number[] = []
       await lzma.decompress(compressed, (p) => progressValues.push(p))
       expect(progressValues.length).toBeGreaterThan(0)
+    })
+
+    test('decompresses from ArrayBuffer input', async () => {
+      const input = 'Hello Worker ArrayBuffer!'
+      const compressed = await lzma.compress(input, 1)
+      const buffer = compressed.buffer.slice(
+        compressed.byteOffset,
+        compressed.byteOffset + compressed.byteLength,
+      )
+      const decompressed = await lzma.decompress(buffer)
+      expect(decompressed).toBe(input)
     })
 
     test('multiple instances work independently', async () => {

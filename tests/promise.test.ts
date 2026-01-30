@@ -22,6 +22,14 @@ describe('Promise API', () => {
       expect(compressed).toBeInstanceOf(Uint8Array)
     })
 
+    test('compresses ArrayBuffer data', async () => {
+      const buffer = new ArrayBuffer(10)
+      const view = new Uint8Array(buffer)
+      view.set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+      const compressed = await compress(buffer, 1)
+      expect(compressed).toBeInstanceOf(Uint8Array)
+    })
+
     test('uses default mode 9 when not specified', async () => {
       const input = 'Test data'
       const compressed = await compress(input)
@@ -54,6 +62,17 @@ describe('Promise API', () => {
       const decompressed = await decompress(compressed)
       expect(decompressed).toBeInstanceOf(Uint8Array)
       expect(compare(input, decompressed)).toBe(true)
+    })
+
+    test('decompresses from ArrayBuffer input', async () => {
+      const input = 'Hello, ArrayBuffer!'
+      const compressed = await compress(input, 1)
+      const buffer = compressed.buffer.slice(
+        compressed.byteOffset,
+        compressed.byteOffset + compressed.byteLength,
+      )
+      const decompressed = await decompress(buffer)
+      expect(decompressed).toBe(input)
     })
   })
 

@@ -3509,6 +3509,12 @@ function encode(s: any): any {
     l = s.length
   /// Be able to handle binary arrays and buffers.
   if (typeof s == 'object') {
+    if (s instanceof ArrayBuffer) {
+      return new Uint8Array(s)
+    }
+    if (ArrayBuffer.isView(s)) {
+      return new Uint8Array(s.buffer, s.byteOffset, s.byteLength)
+    }
     return s
   } else {
     $getChars(s, 0, l, chars, 0)
@@ -3654,6 +3660,15 @@ export function decompress(
   on_finish?: OnFinishCallback | number,
   on_progress?: OnProgressCallback,
 ): string | Uint8Array | void {
+  if (byte_arr instanceof ArrayBuffer) {
+    byte_arr = new Uint8Array(byte_arr)
+  } else if (ArrayBuffer.isView(byte_arr)) {
+    byte_arr = new Uint8Array(
+      byte_arr.buffer,
+      byte_arr.byteOffset,
+      byte_arr.byteLength,
+    )
+  }
   const this$static: any = {}
   let percent: number
   let cbn: number | undefined /// A callback number should be supplied instead of on_finish() if we are using Web Workers.

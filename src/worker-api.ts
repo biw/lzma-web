@@ -137,12 +137,17 @@ export function createWorkerLZMA(): WorkerLZMA {
           onProgress,
         })
 
-        getWorker().postMessage({
-          action: ACTION_COMPRESS,
-          cbn,
-          data: input,
-          mode,
-        })
+        try {
+          getWorker().postMessage({
+            action: ACTION_COMPRESS,
+            cbn,
+            data: input,
+            mode,
+          })
+        } catch (err) {
+          pendingCallbacks.delete(cbn)
+          reject(err instanceof Error ? err : new Error(String(err)))
+        }
       })
     },
 
@@ -158,12 +163,17 @@ export function createWorkerLZMA(): WorkerLZMA {
           onProgress,
         })
 
-        getWorker().postMessage({
-          action: ACTION_DECOMPRESS,
-          cbn,
-          data: input,
-          mode: false,
-        })
+        try {
+          getWorker().postMessage({
+            action: ACTION_DECOMPRESS,
+            cbn,
+            data: input,
+            mode: false,
+          })
+        } catch (err) {
+          pendingCallbacks.delete(cbn)
+          reject(err instanceof Error ? err : new Error(String(err)))
+        }
       })
     },
 
