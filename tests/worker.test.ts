@@ -146,7 +146,7 @@ describe('Worker API', () => {
       const buffer = compressed.buffer.slice(
         compressed.byteOffset,
         compressed.byteOffset + compressed.byteLength,
-      )
+      ) as ArrayBuffer
       const decompressed = await lzma.decompress(buffer)
       expect(decompressed).toBe(input)
     })

@@ -70,7 +70,7 @@ describe('Promise API', () => {
       const buffer = compressed.buffer.slice(
         compressed.byteOffset,
         compressed.byteOffset + compressed.byteLength,
-      )
+      ) as ArrayBuffer
       const decompressed = await decompress(buffer)
       expect(decompressed).toBe(input)
     })
