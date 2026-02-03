@@ -1,0 +1,155 @@
+name: Benchmark PR
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Generate modules
+        run: yarn generate
+
+      - name: Run benchmarks on PR branch
+        id: pr-bench
+        run: yarn test:bench --reporter=json --reporter=default > pr-bench.json 2>&1 || true
+
+      - name: Save PR benchmark results
+        run: |
+          if [ -f pr-bench.json ]; then
+            cp pr-bench.json /tmp/pr-results.json
+          fi
+
+      - name: Checkout main branch
+        run: |
+          git stash --include-untracked || true
+          git checkout origin/main
+
+      - name: Install dependencies (main)
+        run: yarn install --immutable
+
+      - name: Generate modules (main)
+        run: |
+          # Only run if generate script exists
+          if [ -f scripts/generate-modules.js ]; then
+            yarn generate
+          fi
+        continue-on-error: true
+
+      - name: Run benchmarks on main branch
+        id: main-bench
+        run: yarn test:bench --reporter=json --reporter=default > main-bench.json 2>&1 || true
+        continue-on-error: true
+
+      - name: Save main benchmark results
+        run: |
+          if [ -f main-bench.json ]; then
+            cp main-bench.json /tmp/main-results.json
+          fi
+
+      - name: Checkout PR branch again
+        uses: actions/checkout@v4
+
+      - name: Install dependencies for comparison
+        run: yarn install --immutable
+
+      - name: Restore benchmark results
+        run: |
+          if [ -f /tmp/pr-results.json ]; then
+            cp /tmp/pr-results.json pr-results.json
+          fi
+          if [ -f /tmp/main-results.json ]; then
+            cp /tmp/main-results.json main-results.json
+          fi
+
+      - name: Compare benchmarks
+        id: compare
+        run: |
+          if [ -f pr-results.json ] && [ -f main-results.json ]; then
+            node scripts/compare-benchmarks.js
+          else
+            echo "## 📊 Benchmark Comparison" > benchmark-comparison.md
+            echo "" >> benchmark-comparison.md
+            if [ ! -f pr-results.json ]; then
+              echo "⚠️ PR benchmarks did not produce results." >> benchmark-comparison.md
+            fi
+            if [ ! -f main-results.json ]; then
+              echo "⚠️ Main branch benchmarks did not produce results (this may be expected for new features)." >> benchmark-comparison.md
+            fi
+            echo "" >> benchmark-comparison.md
+            echo "Benchmarks will be fully comparable once this PR is merged and a baseline is established." >> benchmark-comparison.md
+          fi
+        continue-on-error: true
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            const COMMENT_MARKER = '<!-- lzma-benchmark-comment -->';
+
+            let body;
+            if (fs.existsSync('benchmark-comparison.md')) {
+              body = fs.readFileSync('benchmark-comparison.md', 'utf8');
+            } else {
+              body = '⚠️ Benchmark comparison could not be generated. This may be expected if the main branch has a different structure.';
+            }
+
+            // Add marker and timestamp
+            const timestamp = new Date().toISOString();
+            body = `${COMMENT_MARKER}\n${body}\n\n<sub>Last updated: ${timestamp}</sub>`;
+
+            // Find existing benchmark comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const benchmarkComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes(COMMENT_MARKER)
+            );
+
+            if (benchmarkComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: benchmarkComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }

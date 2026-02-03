@@ -2,3 +2,26 @@ node_modules/
 coverage/
 todo
 dist/
+
+# Auto-generated modules (created by scripts/generate-modules.js)
+src/generated/
+
+# Test performance tracking
+test-results.json
+test-performance.csv
+
+# Benchmark comparison files
+main-results.json
+pr-results.json
+benchmark-comparison.md
+
+# Yarn Berry
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+.DS_Store

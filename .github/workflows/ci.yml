@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - full-refactor
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            .yarn/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn-${{ github.ref }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ github.ref }}-
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Generate modules
+        run: yarn generate
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Type check
+        run: yarn tsc --noEmit
+
+      - name: Test with Coverage
+        run: yarn test:coverage
+
+      - name: Coverage Summary
+        if: always()
+        run: |
+          if [ -f coverage/coverage-summary.json ]; then
+            echo "## 📊 Test Coverage Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| File | Statements | Branches | Functions | Lines |" >> $GITHUB_STEP_SUMMARY
+            echo "|------|-----------|----------|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+
+            node -e "
+              const data = require('./coverage/coverage-summary.json');
+              for (const [file, metrics] of Object.entries(data)) {
+                const name = file === 'total' ? '**Total**' : file.replace(process.cwd() + '/', '');
+                const stmt = metrics.statements.pct + '%';
+                const branch = metrics.branches.pct + '%';
+                const func = metrics.functions.pct + '%';
+                const lines = metrics.lines.pct + '%';
+                console.log('| ' + name + ' | ' + stmt + ' | ' + branch + ' | ' + func + ' | ' + lines + ' |');
+              }
+            " >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Build
+        run: yarn build
+
+      - name: Check build output
+        run: |
+          if [ ! -f "dist/index.js" ] || [ ! -f "dist/index.cjs" ] || [ ! -f "dist/index.d.ts" ]; then
+            echo "Build output is incomplete"
+            exit 1
+          fi
+          echo "Build output verified successfully"

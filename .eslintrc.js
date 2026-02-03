@@ -1,15 +1,18 @@
 module.exports = {
   extends: [
-    "eslint:recommended",
-    "prettier",
-    "plugin:prettier/recommended", // should always be the end
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+    'plugin:prettier/recommended', // should always be the end
   ],
-  ignorePatterns: ["**/docs/*.ts"],
-  plugins: ["@typescript-eslint", "prettier"],
-  parser: "@typescript-eslint/parser",
+  ignorePatterns: ['**/docs/*.ts'],
+  plugins: ['@typescript-eslint', 'prettier'],
+  parser: '@typescript-eslint/parser',
   env: {
     node: true,
     jest: true,
-    es6: true,
+    browser: true,
+    es2022: true,
+    worker: true,
   },
-};
+}
