@@ -81,7 +81,6 @@
     "test:perf": "node scripts/track-perf.js",
     "test:bench": "vitest bench",
     "test:compare": "vitest bench tests/comparison.bench.ts",
-    "generate:comparison": "node scripts/generate-comparison.js",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "test:all": "vitest run && vitest run --config vitest.browser.config.ts",
     "lint": "eslint src/**/*.ts",

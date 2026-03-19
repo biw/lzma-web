@@ -527,19 +527,24 @@ const decompressed: string | Uint8Array = await decompress(compressed)
 
 ---
 
-## Performance
+## Benchmarks and CI
 
-This project includes automated benchmark tracking. See [PERFORMANCE.md](PERFORMANCE.md) for:
+Benchmark tooling is available, but it is not part of the main CI workflow on every commit.
 
-- Running benchmarks locally
-- Performance tracking over time
-- GitHub PR integration with automatic benchmark comparisons
+- `yarn test:bench` runs the Vitest benchmark suites locally
+- `yarn test:perf` records local benchmark runs to `test-performance.csv`
+- `.github/workflows/ci.yml` runs linting, type checking, test coverage, and build verification
+- `.github/workflows/benchmark-pr.yml` runs benchmark comparisons only for pull requests that target `main`
+
+If you push new commits to a PR targeting `main`, the benchmark workflow runs again and updates the PR comment. Direct pushes to branches or pushes to `main` do not run benchmark comparisons.
+
+See [PERFORMANCE.md](PERFORMANCE.md) for benchmark commands, local tracking, and PR comparison details.
 
 ```bash
-# Run benchmarks
+# Run benchmarks locally
 yarn test:bench
 
-# Track performance over time
+# Track local benchmark history
 yarn test:perf
 ```
 
