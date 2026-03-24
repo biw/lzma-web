@@ -527,25 +527,18 @@ const decompressed: string | Uint8Array = await decompress(compressed)
 
 ---
 
-## Benchmarks and CI
+## Performance
 
-Benchmark tooling is available, but it is not part of the main CI workflow on every commit.
+lzma-web offers three execution modes — **sync**, **async**, and **Web Worker** — so you can choose the right trade-off between simplicity and main-thread responsiveness. The Worker mode keeps compression and decompression off the main thread entirely, which is ideal for larger payloads.
 
-- `yarn test:bench` runs the Vitest benchmark suites locally
-- `yarn test:perf` records local benchmark runs to `test-performance.csv`
-- `.github/workflows/ci.yml` runs linting, type checking, test coverage, and build verification
-- `.github/workflows/benchmark-pr.yml` runs benchmark comparisons only for pull requests that target `main`
+Among isomorphic LZMA libraries (ones that run in both the browser and Node.js), lzma-web is the fastest. In our benchmarks it is roughly **2x faster** than `@sarakusha/lzma` for compression and decompression of typical payloads. Compression is also significantly faster than the previous version (3.0.1).
 
-If you push new commits to a PR targeting `main`, the benchmark workflow runs again and updates the PR comment. Direct pushes to branches or pushes to `main` do not run benchmark comparisons.
+Native solutions like `@napi-rs/lzma` (Rust) and `lzma-native` (C++) are faster in Node.js environments, but they can't run in the browser. If you need LZMA that works everywhere, lzma-web is the best option.
 
-See [PERFORMANCE.md](PERFORMANCE.md) for benchmark commands, local tracking, and PR comparison details.
+Run the comparison benchmarks yourself:
 
 ```bash
-# Run benchmarks locally
 yarn test:bench
-
-# Track local benchmark history
-yarn test:perf
 ```
 
 ---

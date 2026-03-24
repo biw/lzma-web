@@ -17,7 +17,6 @@ tests/
 .yarnrc.yml
 
 eslint.config.js
-PERFORMANCE.md
 tsconfig.json
 tsup.config.ts
 vitest.browser.config.ts
