@@ -10,6 +10,8 @@ import {
   compress as compressCore,
   decompress as decompressCore,
 } from './lzma_main.js'
+import type { CompressMode, OnProgressCallback } from './types.js'
+
 export type { CompressMode, OnProgressCallback } from './types.js'
 
 /**
