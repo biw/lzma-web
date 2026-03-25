@@ -63,8 +63,6 @@ console.log(decompressed) // 'Hello, World!'
 
 The default entry point provides Promise-based compression and decompression.
 
-#### Functional API
-
 ```javascript
 import { compress, decompress } from 'lzma-web'
 
@@ -78,16 +76,23 @@ const fastCompressed = await compress('Hello, World!', 1)
 const decompressed = await decompress(compressed)
 ```
 
-#### Class-based API
+#### Compression Levels
 
-```javascript
-import LZMA from 'lzma-web'
+The second argument to `compress` controls the compression level (1–9). Higher levels compress more but take longer.
 
-const lzma = new LZMA()
+| Level | Memory Usage | Speed | Ratio |
+|-------|-------------|-------|-------|
+| 1 | ~1 MB | Fastest | ~40% |
+| 2 | ~2 MB | Very Fast | ~42% |
+| 3 | ~4 MB | Fast | ~45% |
+| 4 | ~8 MB | Medium-Fast | ~48% |
+| 5 | ~16 MB | Medium | ~50% |
+| 6 | ~32 MB | Medium-Slow | ~52% |
+| 7 | ~48 MB | Slow | ~53% |
+| 8 | ~64 MB | Very Slow | ~54% |
+| 9 | ~64 MB | Slowest | ~55% |
 
-const compressed = await lzma.compress('Hello, World!', 5)
-const decompressed = await lzma.decompress(compressed)
-```
+Default is **9** (best compression). Ratios are approximate and vary based on input data.
 
 #### With Progress Callbacks
 
@@ -115,46 +120,6 @@ const decompressed = await decompress(
 )
 ```
 
-#### Callback-based API
-
-For advanced use cases where you need callback-style flow control:
-
-```javascript
-import LZMA from 'lzma-web'
-
-const lzma = new LZMA()
-
-lzma.cb.compress(
-  'Hello, World!',
-  9, // compression level (required for callback API)
-  (result, error) => {
-    if (error) {
-      console.error('Compression failed:', error)
-      return
-    }
-    console.log('Compressed:', result)
-  },
-  (progress) => {
-    console.log(`Progress: ${(progress * 100).toFixed(1)}%`)
-  }
-)
-```
-
-#### Type Signatures
-
-```typescript
-function compress(
-  input: string | Uint8Array | ArrayBuffer,
-  mode?: CompressMode,
-  onProgress?: OnProgressCallback
-): Promise<Uint8Array>
-
-function decompress(
-  input: Uint8Array | ArrayBuffer,
-  onProgress?: OnProgressCallback
-): Promise<string | Uint8Array>
-```
-
 ---
 
 ### Synchronous API (`lzma-web/sync`)
@@ -172,19 +137,6 @@ const decompressed = decompressSync(compressed)
 ```
 
 > **Note:** Synchronous operations block the main thread. Use for small data or in Node.js environments where blocking is acceptable.
-
-#### Type Signatures
-
-```typescript
-function compressSync(
-  input: string | Uint8Array | ArrayBuffer,
-  mode?: CompressMode
-): Uint8Array
-
-function decompressSync(
-  input: Uint8Array | ArrayBuffer
-): string | Uint8Array
-```
 
 ---
 
@@ -206,42 +158,6 @@ const decompressed = await lzma.decompress(compressed)
 
 // Clean up when done (important!)
 lzma.terminate()
-```
-
-#### With Progress
-
-```javascript
-import { createWorkerLZMA } from 'lzma-web/worker'
-
-const lzma = createWorkerLZMA()
-
-const compressed = await lzma.compress(
-  largeData,
-  9,
-  (progress) => console.log(`Progress: ${progress * 100}%`)
-)
-
-lzma.terminate()
-```
-
-#### WorkerLZMA Interface
-
-```typescript
-interface WorkerLZMA {
-  compress(
-    input: string | Uint8Array | ArrayBuffer,
-    mode?: CompressMode,
-    onProgress?: OnProgressCallback
-  ): Promise<Uint8Array>
-
-  decompress(
-    input: Uint8Array | ArrayBuffer,
-    onProgress?: OnProgressCallback
-  ): Promise<string | Uint8Array>
-
-  terminate(): void
-  readonly worker: Worker | null
-}
 ```
 
 > **Note:** The Worker is created lazily on first operation. Call `terminate()` to clean up resources when you're done.
@@ -290,141 +206,11 @@ const decompressedWithProgress = await decompressAsync(compressedData, (p) => {
 
 ---
 
-## Types
-
-### CompressMode
-
-Compression level from 1 to 9:
-
-```typescript
-type CompressMode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-```
-
-| Level | Speed | Compression Ratio | Use Case |
-|-------|-------|-------------------|----------|
-| 1 | Fastest | Lowest | Real-time compression, large files |
-| 5 | Balanced | Good | General purpose |
-| 9 | Slowest | Best | Archival, bandwidth-constrained |
-
-Default is **9** (best compression).
-
-### Input Types
-
-All compression functions accept:
-
-```typescript
-string | Uint8Array | ArrayBuffer
-```
-
-- **string** - UTF-8 text (automatically encoded)
-- **Uint8Array** - Binary data
-- **ArrayBuffer** - Binary data
-
-### Output Types
-
-**Compression** always returns:
-
-```typescript
-Uint8Array // Compressed LZMA bytes
-```
-
-**Decompression** returns:
-
-```typescript
-string | Uint8Array
-```
-
-- Returns `string` if the decompressed data is valid UTF-8 text
-- Returns `Uint8Array` if the data is binary or invalid UTF-8
-
-### Progress Callback
-
-```typescript
-type OnProgressCallback = (percent: number) => void
-```
-
-- **Compression:** `percent` ranges from `0` to `1` (0% to 100%)
-- **Decompression:** `percent` ranges from `0` to `1`, or `-1` if the uncompressed size is unknown
-
----
-
-## Compression Levels
-
-| Level | Memory Usage | Speed | Ratio |
-|-------|-------------|-------|-------|
-| 1 | ~1 MB | Fastest | ~40% |
-| 2 | ~2 MB | Very Fast | ~42% |
-| 3 | ~4 MB | Fast | ~45% |
-| 4 | ~8 MB | Medium-Fast | ~48% |
-| 5 | ~16 MB | Medium | ~50% |
-| 6 | ~32 MB | Medium-Slow | ~52% |
-| 7 | ~48 MB | Slow | ~53% |
-| 8 | ~64 MB | Very Slow | ~54% |
-| 9 | ~64 MB | Slowest | ~55% |
-
-> **Note:** Ratios are approximate and vary significantly based on input data. Highly compressible data (text, repetitive content) achieves much better ratios than random or pre-compressed data.
-
----
-
-## Error Handling
-
-### Promise API
-
-```javascript
-import { compress, decompress } from 'lzma-web'
-
-try {
-  const compressed = await compress(data, 5)
-  const decompressed = await decompress(compressed)
-} catch (error) {
-  console.error('LZMA operation failed:', error.message)
-}
-```
-
-### Synchronous API
-
-```javascript
-import { compressSync, decompressSync } from 'lzma-web/sync'
-
-try {
-  const compressed = compressSync(data, 5)
-  const decompressed = decompressSync(compressed)
-} catch (error) {
-  console.error('LZMA operation failed:', error.message)
-}
-```
-
-### Callback API
-
-```javascript
-lzma.cb.decompress(
-  data,
-  (result, error) => {
-    if (error) {
-      console.error('Decompression failed:', error.message)
-      return
-    }
-    console.log('Success:', result)
-  }
-)
-```
-
-Common errors:
-- Invalid or corrupted LZMA data
-- Truncated input data
-- Unsupported LZMA format version
-
----
-
 ## Web Workers
 
 ### How It Works
 
 The main `lzma-web` API automatically uses Web Workers in browsers to prevent blocking the UI thread. Workers are initialized lazily on first use.
-
-### Browser Support
-
-Web Workers are supported in all modern browsers. See [Can I Use: Web Workers](https://caniuse.com/webworkers).
 
 ### Fallback Behavior
 
@@ -478,66 +264,22 @@ const data = await decompress(serverResponse)
 
 ---
 
-## LZMA Format Compatibility
-
-`lzma-web` produces output compatible with the reference LZMA implementation. You can:
-
-- Compress with `lzma-web`, decompress with the `lzma` command-line tool
-- Compress with `lzma` command-line tool, decompress with `lzma-web`
-
-```bash
-# Compress with lzma CLI
-lzma -z < input.txt > compressed.lzma
-
-# Decompress with lzma CLI
-lzma -d < compressed.lzma > output.txt
-```
-
-### LZMA Header Format
-
-The compressed output follows the standard LZMA format:
-- Byte 0: Properties byte (lc, lp, pb)
-- Bytes 1-4: Dictionary size (little-endian)
-- Bytes 5-12: Uncompressed size (little-endian, 8 bytes)
-- Remaining: Compressed data
-
----
-
-## TypeScript
-
-Full TypeScript support with exported types:
-
-```typescript
-import {
-  compress,
-  decompress,
-  type CompressMode,
-  type OnProgressCallback
-} from 'lzma-web'
-
-const mode: CompressMode = 5
-
-const onProgress: OnProgressCallback = (percent) => {
-  console.log(`${percent * 100}%`)
-}
-
-const compressed: Uint8Array = await compress('Hello', mode, onProgress)
-const decompressed: string | Uint8Array = await decompress(compressed)
-```
-
----
-
 ## Performance
 
-lzma-web offers three execution modes — **sync**, **async**, and **Web Worker** — so you can choose the right trade-off between simplicity and main-thread responsiveness. The Worker mode keeps compression and decompression off the main thread entirely, which is ideal for larger payloads.
+As of March 2026, lzma-web is the fastest isomorphic (browser + Node.js) LZMA library we could find. It consistently outperforms other pure-JS implementations by 2–5x across compression and decompression workloads.
 
-Among isomorphic LZMA libraries (ones that run in both the browser and Node.js), lzma-web is the fastest. In our benchmarks it is roughly **2x faster** than `@sarakusha/lzma` for compression and decompression of typical payloads. Compression is also significantly faster than the previous version (3.0.1).
+| Library | Type | Small text compress | Large text (~4 MB) compress | Small text decompress |
+|---------|------|--------------------:|----------------------------:|----------------------:|
+| **lzma-web** | JS (isomorphic) | **71.8 ops/s** | **0.30 hz** | **380.6 ops/s** |
+| `@sarakusha/lzma` | JS (isomorphic) | 33.3 ops/s | 0.19 hz | 190.3 ops/s |
+| `lzma1` | JS (isomorphic) | 25.6 ops/s | 0.06 hz | 163.7 ops/s |
+| `@napi-rs/lzma` | Rust (Node.js only) | 1,195 ops/s | 10.9 hz | 1,930 ops/s |
+| `lzma-native` | C++ (Node.js only) | 334 ops/s | 0.68 hz | 2,727 ops/s |
 
-Native solutions like `@napi-rs/lzma` (Rust) and `lzma-native` (C++) are faster in Node.js environments, but they can't run in the browser. If you need LZMA that works everywhere, lzma-web is the best option.
-
-Run the comparison benchmarks yourself:
+All JS libraries benchmarked at compression level 1. Native solutions like `@napi-rs/lzma` and `lzma-native` are significantly faster in Node.js, but they require native binaries and don't run in the browser.
 
 ```bash
+# Run the comparison benchmarks yourself
 yarn test:bench
 ```
 
@@ -553,40 +295,6 @@ Demo files are included in the `demos/` directory:
 - `simple_node_sync_demo.js` - Node.js sync example
 
 Original live demos from LZMA-JS: [http://lzma-js.github.io/LZMA-JS/](http://lzma-js.github.io/LZMA-JS/)
-
----
-
-## Contributing
-
-```bash
-# Clone the repository
-git clone https://github.com/biw/lzma-web.git
-cd lzma-web
-
-# Install dependencies
-yarn install
-
-# Build
-yarn build
-
-# Run tests
-yarn test
-
-# Run tests in watch mode
-yarn test:watch
-
-# Run browser tests
-yarn test:browser
-
-# Run benchmarks
-yarn test:bench
-
-# Lint
-yarn lint
-
-# Type check
-yarn type-check
-```
 
 ---
 

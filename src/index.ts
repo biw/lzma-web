@@ -10,18 +10,7 @@ import {
   compress as compressCore,
   decompress as decompressCore,
 } from './lzma_main.js'
-import type { CompressMode, OnProgressCallback } from './types.js'
-
-// Re-export types for convenience
 export type { CompressMode, OnProgressCallback } from './types.js'
-
-/**
- * Callback-based LZMA functions (for advanced use cases)
- */
-export const LZMA = {
-  compress: compressCore,
-  decompress: decompressCore,
-}
 
 /**
  * Compress data using LZMA algorithm
@@ -84,46 +73,4 @@ export async function decompress(
       onProgress,
     )
   })
-}
-
-/**
- * LZMA class with Promise-based API (for backward compatibility)
- *
- * @example
- * ```ts
- * import LZMA from 'lzma-web'
- * const lzma = new LZMA()
- * const compressed = await lzma.compress('Hello, World!')
- * const decompressed = await lzma.decompress(compressed)
- * ```
- */
-export default class lzma {
-  /**
-   * Compress data using LZMA algorithm
-   */
-  compress = async (
-    input: string | Uint8Array | ArrayBuffer,
-    mode: CompressMode = 9,
-    onProgress?: OnProgressCallback,
-  ): Promise<Uint8Array> => {
-    return compress(input, mode, onProgress)
-  }
-
-  /**
-   * Decompress LZMA-compressed data
-   */
-  decompress = async (
-    input: Uint8Array | ArrayBuffer,
-    onProgress?: OnProgressCallback,
-  ): Promise<string | Uint8Array> => {
-    return decompress(input, onProgress)
-  }
-
-  /**
-   * Callback-based API (for advanced use cases)
-   */
-  cb = {
-    compress: compressCore,
-    decompress: decompressCore,
-  }
 }
