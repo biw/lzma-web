@@ -5,9 +5,7 @@
 [![bundlephobia][bundlephobia-badge]][bundlephobia]
 [![MIT License][license-badge]][license]
 
-A JavaScript implementation of the Lempel-Ziv-Markov chain (LZMA) compression algorithm for browsers and Node.js.
-
-**Originally forked from [LZMA-JS](https://github.com/nmrugg/LZMA-JS) by [Nathan Rugg](https://github.com/nmrugg).**
+The fastest isomorphic LZMA compression library for JavaScript. Works in browsers and Node.js with a tree-shakeable, Promise-based API and optional Web Worker support.
 
 ## Features
 
@@ -300,7 +298,7 @@ Original live demos from LZMA-JS: [http://lzma-js.github.io/LZMA-JS/](http://lzm
 
 ## License
 
-[MIT](https://github.com/biw/lzma-web/blob/main/LICENSE)
+[MIT](https://github.com/biw/lzma-web/blob/main/LICENSE) — originally forked from [LZMA-JS](https://github.com/nmrugg/LZMA-JS) by [Nathan Rugg](https://github.com/nmrugg).
 
 ---
 
