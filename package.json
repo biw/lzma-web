@@ -5,7 +5,7 @@
   ],
   "author": "Nathan Rugg <nmrugg@gmail.com>",
   "description": "A JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm",
-  "version": "3.0.1",
+  "version": "4.0.0-rc.1",
   "homepage": "https://github.com/biw/lzma-web",
   "repository": {
     "type": "git",
@@ -81,7 +81,6 @@
     "test:perf": "node scripts/track-perf.js",
     "test:bench": "vitest bench",
     "test:compare": "vitest bench tests/comparison.bench.ts",
-    "generate:comparison": "node scripts/generate-comparison.js",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "test:all": "vitest run && vitest run --config vitest.browser.config.ts",
     "lint": "eslint src/**/*.ts",

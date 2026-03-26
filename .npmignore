@@ -1,11 +1,23 @@
-demos
-test
-logo*
-Makefile
-minify.js
-update_gh-pages.sh
-todo
+# `package.json#files` is the primary publish allowlist (`dist/`).
+# Keep this file in sync as a fallback for repo-only sources and tooling.
+
+.context/
+.github/
 coverage/
-bower.json
+scripts/
 src/
-bin
+tests/
+
+.editorconfig
+.eslintrc.js
+.gitignore
+.nvmrc
+.prettierrc
+.yarnrc.yml
+
+eslint.config.js
+tsconfig.json
+tsup.config.ts
+vitest.browser.config.ts
+vitest.config.ts
+yarn.lock
