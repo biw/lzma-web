@@ -8,6 +8,7 @@ export default defineConfig({
     // Benchmark files use *.bench.ts pattern (run with yarn test:bench)
     benchmark: {
       include: ['tests/**/*.bench.ts'],
+      outputJson: 'bench-results.json',
     },
     pool: 'forks',
     poolOptions: {
