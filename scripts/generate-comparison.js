@@ -29,12 +29,15 @@ console.log('This may take several minutes.\n')
 
 let benchmarkOutput
 try {
-  benchmarkOutput = execSync('yarn test:bench tests/comparison.bench.ts --reporter=verbose 2>&1', {
-    cwd: rootDir,
-    encoding: 'utf-8',
-    maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-    timeout: 600000, // 10 minutes
-  })
+  benchmarkOutput = execSync(
+    'yarn test:bench tests/comparison.bench.ts --reporter=verbose 2>&1',
+    {
+      cwd: rootDir,
+      encoding: 'utf-8',
+      maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+      timeout: 600000, // 10 minutes
+    },
+  )
 } catch (error) {
   // Even if the command "fails", we might have output
   benchmarkOutput = error.stdout || error.message
@@ -51,7 +54,9 @@ let currentSuite = ''
 
 for (const line of lines) {
   // Match suite headers like "✓ tests/comparison.bench.ts > Library Comparison - Small Text Compression"
-  const suiteMatch = line.match(/[✓✗] tests\/comparison\.bench\.ts > (.+?)\s+\d+ms/)
+  const suiteMatch = line.match(
+    /[✓✗] tests\/comparison\.bench\.ts > (.+?)\s+\d+ms/,
+  )
   if (suiteMatch) {
     currentSuite = suiteMatch[1]
     if (!results.has(currentSuite)) {
@@ -61,7 +66,9 @@ for (const line of lines) {
   }
 
   // Match benchmark results like "· lzma-web sync    76.1127  11.5815  43.3727  13.1384 ..."
-  const benchMatch = line.match(/^\s*·\s+(.+?)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/)
+  const benchMatch = line.match(
+    /^\s*·\s+(.+?)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/,
+  )
   if (benchMatch && currentSuite) {
     const [, name, hz, min, max, mean] = benchMatch
     results.get(currentSuite).push({
@@ -97,7 +104,6 @@ for (const mode of [1, 5, 9]) {
   }
 }
 
-
 // Generate COMPARISON.md
 console.log('\nGenerating COMPARISON.md...')
 
@@ -114,7 +120,10 @@ This document compares lzma-web against other LZMA implementations.
 | Library | Compressed Size | Ratio |
 |---------|-----------------|-------|
 ${Object.entries(ratios)
-  .map(([name, { size, ratio }]) => `| ${name} | ${(size / 1024).toFixed(0)} KB | ${ratio}% |`)
+  .map(
+    ([name, { size, ratio }]) =>
+      `| ${name} | ${(size / 1024).toFixed(0)} KB | ${ratio}% |`,
+  )
   .join('\n')}
 
 **Key takeaway:** LZMA mode 5 offers a good balance of speed and compression ratio.
@@ -197,7 +206,7 @@ ${benches
   .sort((a, b) => b.hz - a.hz)
   .map((b) => `| ${b.name} | ${b.hz.toFixed(2)} | ${b.mean.toFixed(2)} |`)
   .join('\n')}
-`
+`,
   )
   .join('\n')}
 
@@ -233,7 +242,9 @@ yarn test:bench tests/comparison.bench.ts --reporter=verbose
 fs.writeFileSync(path.join(rootDir, 'COMPARISON.md'), markdown)
 
 console.log('\n✅ Generated COMPARISON.md')
-console.log(`\nCompression ratios for ${(originalSize / 1024).toFixed(0)} KB file:`)
+console.log(
+  `\nCompression ratios for ${(originalSize / 1024).toFixed(0)} KB file:`,
+)
 for (const [name, { size, ratio }] of Object.entries(ratios)) {
   console.log(`  ${name}: ${ratio}% (${(size / 1024).toFixed(0)} KB)`)
 }

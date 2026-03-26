@@ -45,7 +45,6 @@ const duration = endTime - startTime
 // Parse benchmark results from Vitest output
 let benchmarksRun = 0
 let avgHz = 0
-let totalMean = 0
 
 try {
   // Parse the table output from Vitest

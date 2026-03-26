@@ -38,26 +38,8 @@ function stripMarkers(content, startMarker, endMarker) {
   // Using [\s\S] to match any character including newlines
   const regex = new RegExp(
     `\\/\\*\\*\\s*${startMarker}\\s*\\*\\/[\\s\\S]*?\\/\\*\\*\\s*${endMarker}\\s*\\*\\/`,
-    'g'
+    'g',
   )
-  return content.replace(regex, '')
-}
-
-/**
- * Remove the decompress export from compress-only module
- */
-function removeDecompressExport(content) {
-  // Remove the export function decompress declaration
-  const regex = /export function decompress\([^)]*\):[^{]*\{[\s\S]*?^}/gm
-  return content.replace(regex, '')
-}
-
-/**
- * Remove the compress export from decompress-only module
- */
-function removeCompressExport(content) {
-  // Remove the export function compress declaration
-  const regex = /export function compress\([^)]*\):[^{]*\{[\s\S]*?^}/gm
   return content.replace(regex, '')
 }
 
