@@ -11,6 +11,7 @@ test-results.json
 test-performance.csv
 
 # Benchmark comparison files
+bench-results.json
 main-results.json
 pr-results.json
 benchmark-comparison.md
@@ -25,3 +26,4 @@ benchmark-comparison.md
 .pnp.*
 
 .DS_Store
+.context/

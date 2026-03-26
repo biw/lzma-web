@@ -34,12 +34,12 @@ jobs:
 
       - name: Run benchmarks on PR branch
         id: pr-bench
-        run: yarn test:bench --reporter=json --reporter=default > pr-bench.json 2>&1 || true
+        run: yarn test:bench || true
 
       - name: Save PR benchmark results
         run: |
-          if [ -f pr-bench.json ]; then
-            cp pr-bench.json /tmp/pr-results.json
+          if [ -f bench-results.json ]; then
+            cp bench-results.json /tmp/pr-results.json
           fi
 
       - name: Checkout main branch
@@ -58,15 +58,21 @@ jobs:
           fi
         continue-on-error: true
 
+      - name: Ensure benchmark.outputJson is configured (main may not have it)
+        run: |
+          if ! grep -q 'outputJson' vitest.config.ts 2>/dev/null; then
+            sed -i "s/include: \['tests\/\*\*\/\*.bench.ts'\]/include: ['tests\/**\/*.bench.ts'], outputJson: 'bench-results.json'/" vitest.config.ts || true
+          fi
+
       - name: Run benchmarks on main branch
         id: main-bench
-        run: yarn test:bench --reporter=json --reporter=default > main-bench.json 2>&1 || true
+        run: yarn test:bench || true
         continue-on-error: true
 
       - name: Save main benchmark results
         run: |
-          if [ -f main-bench.json ]; then
-            cp main-bench.json /tmp/main-results.json
+          if [ -f bench-results.json ]; then
+            cp bench-results.json /tmp/main-results.json
           fi
 
       - name: Checkout PR branch again

@@ -48,6 +48,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', 'demos/**', '.yarn/**', 'src/generated/**'],
+    ignores: ['dist/**', 'node_modules/**', '.yarn/**', 'src/generated/**'],
   },
 )

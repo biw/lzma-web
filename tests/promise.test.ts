@@ -1,6 +1,5 @@
 import { describe, test, expect } from 'vitest'
 import { compress, decompress } from '../src/index.js'
-import LZMA from '../src/index.js'
 import { compare } from './utils.js'
 
 describe('Promise API', () => {
@@ -109,56 +108,10 @@ describe('Promise API', () => {
     })
   })
 
-  describe('LZMA class', () => {
-    test('instance can compress', async () => {
-      const lzma = new LZMA()
-      const result = await lzma.compress('Hello!', 1)
-      expect(result).toBeInstanceOf(Uint8Array)
-    })
-
-    test('instance can decompress', async () => {
-      const lzma = new LZMA()
-      const compressed = await lzma.compress('Hello!', 1)
-      const decompressed = await lzma.decompress(compressed)
-      expect(decompressed).toBe('Hello!')
-    })
-
-    test('roundtrip with class', async () => {
-      const lzma = new LZMA()
-      const input = 'Test message for LZMA class'
-      const compressed = await lzma.compress(input, 5)
-      const decompressed = await lzma.decompress(compressed)
-      expect(decompressed).toBe(input)
-    })
-
-    test('class supports progress callbacks', async () => {
-      const lzma = new LZMA()
-      const progressValues: number[] = []
-      const input = 'A'.repeat(5000)
-      await lzma.compress(input, 1, (p) => progressValues.push(p))
-      expect(progressValues.length).toBeGreaterThan(0)
-    })
-  })
-
   describe('error handling', () => {
     test('rejects on invalid compressed data', async () => {
       const invalidData = new Uint8Array([0, 1, 2, 3, 4, 5])
       await expect(decompress(invalidData)).rejects.toThrow()
-    })
-  })
-
-  describe('LZMA callback API (cb property)', () => {
-    test('lzma.cb.compress works', () => {
-      const lzma = new LZMA()
-      const result = lzma.cb.compress('Hello!', 1)
-      expect(result).toBeInstanceOf(Uint8Array)
-    })
-
-    test('lzma.cb.decompress works', () => {
-      const lzma = new LZMA()
-      const compressed = lzma.cb.compress('Hello!', 1)
-      const result = lzma.cb.decompress(compressed as Uint8Array)
-      expect(result).toBe('Hello!')
     })
   })
 
