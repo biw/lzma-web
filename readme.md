@@ -283,19 +283,6 @@ yarn test:bench
 
 ---
 
-## Demos
-
-Demo files are included in the `demos/` directory:
-
-- `simple_demo.html` - Basic browser usage
-- `advanced_demo.html` - Advanced features
-- `simple_node_demo.js` - Node.js async example
-- `simple_node_sync_demo.js` - Node.js sync example
-
-Original live demos from LZMA-JS: [http://lzma-js.github.io/LZMA-JS/](http://lzma-js.github.io/LZMA-JS/)
-
----
-
 ## License
 
 [MIT](https://github.com/biw/lzma-web/blob/main/LICENSE) — originally forked from [LZMA-JS](https://github.com/nmrugg/LZMA-JS) by [Nathan Rugg](https://github.com/nmrugg).
