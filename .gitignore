@@ -25,3 +25,4 @@ benchmark-comparison.md
 .pnp.*
 
 .DS_Store
+.context/
