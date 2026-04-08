@@ -19,6 +19,7 @@ jobs:
       version-changed: ${{ steps.check.outputs.changed }}
       version: ${{ steps.check.outputs.version }}
       should-publish: ${{ steps.check.outputs.should_publish }}
+      prerelease: ${{ steps.check.outputs.prerelease }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,6 +40,14 @@ jobs:
           # Get published version from npm (if it exists)
           PUBLISHED_VERSION=$(npm view lzma-web version 2>/dev/null || echo "none")
           echo "Published version on npm: $PUBLISHED_VERSION"
+
+          # Check if this is a prerelease version (contains a hyphen, e.g. 4.0.0-rc.1)
+          if [[ "$CURRENT_VERSION" == *-* ]]; then
+            echo "Detected prerelease version"
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
 
           # Compare versions
           if [ "$PUBLISHED_VERSION" = "none" ]; then
@@ -105,7 +114,12 @@ jobs:
         run: npm --version
 
       - name: Publish to npm with provenance
-        run: npm publish --provenance --access public
+        run: |
+          if [ "${{ needs.check-version.outputs.prerelease }}" = "true" ]; then
+            npm publish --provenance --access public --tag next
+          else
+            npm publish --provenance --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -115,5 +129,5 @@ jobs:
           tag_name: v${{ needs.check-version.outputs.version }}
           name: v${{ needs.check-version.outputs.version }}
           draft: false
-          prerelease: false
+          prerelease: ${{ needs.check-version.outputs.prerelease == 'true' }}
           generate_release_notes: true
