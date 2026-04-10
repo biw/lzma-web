@@ -52,14 +52,45 @@ jobs:
           git stash --include-untracked || true
           git checkout origin/main
 
+      - name: Detect main branch package manager
+        run: |
+          PACKAGE_MANAGER=$(node -p "const pm = require('./package.json').packageManager || ''; pm ? pm.split('@')[0] : 'npm'")
+          echo "MAIN_PACKAGE_MANAGER=$PACKAGE_MANAGER" >> "$GITHUB_ENV"
+
       - name: Install dependencies (main)
         run: pnpm install --frozen-lockfile
+        if: env.MAIN_PACKAGE_MANAGER == 'pnpm'
+
+      - name: Install dependencies on main with Yarn
+        if: env.MAIN_PACKAGE_MANAGER == 'yarn'
+        run: corepack yarn install --immutable
+
+      - name: Install dependencies on main with npm
+        if: env.MAIN_PACKAGE_MANAGER == 'npm'
+        run: npm ci
 
       - name: Generate modules (main)
+        if: env.MAIN_PACKAGE_MANAGER == 'pnpm'
         run: |
           # Only run if generate script exists
           if [ -f scripts/generate-modules.js ]; then
             pnpm generate
+          fi
+        continue-on-error: true
+
+      - name: Generate modules on main with Yarn
+        if: env.MAIN_PACKAGE_MANAGER == 'yarn'
+        run: |
+          if [ -f scripts/generate-modules.js ]; then
+            corepack yarn generate
+          fi
+        continue-on-error: true
+
+      - name: Generate modules on main with npm
+        if: env.MAIN_PACKAGE_MANAGER == 'npm'
+        run: |
+          if [ -f scripts/generate-modules.js ]; then
+            npm run generate
           fi
         continue-on-error: true
 
@@ -72,6 +103,17 @@ jobs:
       - name: Run benchmarks on main branch
         id: main-bench
         run: pnpm test:bench || true
+        if: env.MAIN_PACKAGE_MANAGER == 'pnpm'
+        continue-on-error: true
+
+      - name: Run benchmarks on main branch with Yarn
+        if: env.MAIN_PACKAGE_MANAGER == 'yarn'
+        run: corepack yarn test:bench || true
+        continue-on-error: true
+
+      - name: Run benchmarks on main branch with npm
+        if: env.MAIN_PACKAGE_MANAGER == 'npm'
+        run: npm run test:bench || true
         continue-on-error: true
 
       - name: Save main benchmark results
