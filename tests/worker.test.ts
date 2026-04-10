@@ -39,6 +39,10 @@ describe('Worker API', () => {
 
         postMessage(_message: unknown): void {}
 
+        addEventListener(): void {}
+
+        removeEventListener(): void {}
+
         terminate(): void {}
       }
 
@@ -68,6 +72,10 @@ describe('Worker API', () => {
             } as ErrorEvent)
           })
         }
+
+        addEventListener(): void {}
+
+        removeEventListener(): void {}
 
         terminate(): void {}
       }
