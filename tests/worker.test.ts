@@ -1,4 +1,11 @@
-import { describe, test, expect, beforeEach, afterEach } from 'vitest'
+import {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+} from 'vitest'
 import { createWorkerLZMA } from '../src/worker-api.js'
 import type { WorkerLZMA } from '../src/types.js'
 
@@ -18,6 +25,67 @@ describe('Worker API', () => {
     test('worker is null before first operation', () => {
       const lzma = createWorkerLZMA()
       expect(lzma.worker).toBeNull()
+    })
+
+    test('does not create a worker or emit errors on instantiation', () => {
+      class SilentWorkerMock {
+        static instances: SilentWorkerMock[] = []
+        onmessage: Worker['onmessage'] = null
+        onerror: Worker['onerror'] = null
+
+        constructor(_url: URL | string, _options?: unknown) {
+          SilentWorkerMock.instances.push(this)
+        }
+
+        postMessage(_message: unknown): void {}
+
+        terminate(): void {}
+      }
+
+      vi.stubGlobal('Worker', SilentWorkerMock as unknown as typeof Worker)
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const lzma = createWorkerLZMA()
+
+      expect(lzma.worker).toBeNull()
+      expect(SilentWorkerMock.instances).toHaveLength(0)
+      expect(errorSpy).not.toHaveBeenCalled()
+    })
+
+    test('rejects startup failures through the API', async () => {
+      class FailingWorkerMock {
+        onmessage: Worker['onmessage'] = null
+        onerror: Worker['onerror'] = null
+
+        constructor(_url: URL | string, _options?: unknown) {}
+
+        postMessage(_message: unknown): void {
+          queueMicrotask(() => {
+            this.onerror?.({
+              message: 'mock worker bootstrap failure',
+              filename: 'mock-worker.js',
+              lineno: 1,
+            } as ErrorEvent)
+          })
+        }
+
+        terminate(): void {}
+      }
+
+      vi.stubGlobal('Worker', FailingWorkerMock as unknown as typeof Worker)
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const lzma = createWorkerLZMA()
+
+      await expect(lzma.compress('test', 1)).rejects.toThrow(
+        /Worker error: mock worker bootstrap failure/,
+      )
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Uncaught error in LZMA worker',
+        expect.objectContaining({
+          message:
+            'Worker error: mock worker bootstrap failure (mock-worker.js:1)',
+        }),
+      )
     })
   })
 
@@ -195,5 +263,10 @@ describe('Worker API', () => {
         )
       },
     )
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
   })
 })
