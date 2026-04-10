@@ -20,35 +20,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          path: |
-            .yarn/cache
-            .yarn/install-state.gz
-          key: ${{ runner.os }}-yarn-${{ github.ref }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-${{ github.ref }}-
-            ${{ runner.os }}-yarn-
+          version: 10.33.0
+          run_install: false
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Generate modules
-        run: yarn generate
+        run: pnpm generate
 
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Type check
-        run: yarn tsc --noEmit
+        run: pnpm type-check
 
       - name: Test with Coverage
-        run: yarn test:coverage
+        run: pnpm test:coverage
 
       - name: Coverage Summary
         if: always()
@@ -73,7 +67,7 @@ jobs:
           fi
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Check build output
         run: |

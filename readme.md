@@ -22,9 +22,6 @@ The fastest isomorphic LZMA compression library for JavaScript. Works in browser
 # npm
 npm install lzma-web
 
-# yarn
-yarn add lzma-web
-
 # pnpm
 pnpm add lzma-web
 ```
@@ -278,7 +275,7 @@ All JS libraries benchmarked at compression level 1. Native solutions like `@nap
 
 ```bash
 # Run the comparison benchmarks yourself
-yarn test:bench
+pnpm test:bench
 ```
 
 ---
