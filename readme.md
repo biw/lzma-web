@@ -29,8 +29,6 @@ yarn add lzma-web
 pnpm add lzma-web
 ```
 
-This package can be installed with any Node package manager. The repository itself uses `pnpm` for local development and CI.
-
 ## Quick Start
 
 ```javascript
