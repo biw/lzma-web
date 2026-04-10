@@ -9,7 +9,7 @@ The fastest isomorphic LZMA compression library for JavaScript. Works in browser
 
 ## Features
 
-- **Multiple APIs** - Promise-based, synchronous, callback-based, and Web Worker APIs
+- **Multiple APIs** - Promise-based, synchronous, and Web Worker APIs
 - **Tree-shakeable** - Import only compression or decompression to reduce bundle size
 - **TypeScript** - Full type definitions included
 - **Web Workers** - Automatic off-main-thread compression in browsers
