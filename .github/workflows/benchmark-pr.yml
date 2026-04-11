@@ -18,23 +18,28 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-
-      - name: Enable Corepack
-        run: corepack enable
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Generate modules
-        run: yarn generate
+        run: pnpm generate
 
       - name: Run benchmarks on PR branch
         id: pr-bench
-        run: yarn test:bench || true
+        run: pnpm test:bench || true
 
       - name: Save PR benchmark results
         run: |
@@ -47,14 +52,45 @@ jobs:
           git stash --include-untracked || true
           git checkout origin/main
 
+      - name: Detect main branch package manager
+        run: |
+          PACKAGE_MANAGER=$(node -p "const pm = require('./package.json').packageManager || ''; pm ? pm.split('@')[0] : 'npm'")
+          echo "MAIN_PACKAGE_MANAGER=$PACKAGE_MANAGER" >> "$GITHUB_ENV"
+
       - name: Install dependencies (main)
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
+        if: env.MAIN_PACKAGE_MANAGER == 'pnpm'
+
+      - name: Install dependencies on main with Yarn
+        if: env.MAIN_PACKAGE_MANAGER == 'yarn'
+        run: corepack yarn install --immutable
+
+      - name: Install dependencies on main with npm
+        if: env.MAIN_PACKAGE_MANAGER == 'npm'
+        run: npm ci
 
       - name: Generate modules (main)
+        if: env.MAIN_PACKAGE_MANAGER == 'pnpm'
         run: |
           # Only run if generate script exists
           if [ -f scripts/generate-modules.js ]; then
-            yarn generate
+            pnpm generate
+          fi
+        continue-on-error: true
+
+      - name: Generate modules on main with Yarn
+        if: env.MAIN_PACKAGE_MANAGER == 'yarn'
+        run: |
+          if [ -f scripts/generate-modules.js ]; then
+            corepack yarn generate
+          fi
+        continue-on-error: true
+
+      - name: Generate modules on main with npm
+        if: env.MAIN_PACKAGE_MANAGER == 'npm'
+        run: |
+          if [ -f scripts/generate-modules.js ]; then
+            npm run generate
           fi
         continue-on-error: true
 
@@ -66,7 +102,18 @@ jobs:
 
       - name: Run benchmarks on main branch
         id: main-bench
-        run: yarn test:bench || true
+        run: pnpm test:bench || true
+        if: env.MAIN_PACKAGE_MANAGER == 'pnpm'
+        continue-on-error: true
+
+      - name: Run benchmarks on main branch with Yarn
+        if: env.MAIN_PACKAGE_MANAGER == 'yarn'
+        run: corepack yarn test:bench || true
+        continue-on-error: true
+
+      - name: Run benchmarks on main branch with npm
+        if: env.MAIN_PACKAGE_MANAGER == 'npm'
+        run: npm run test:bench || true
         continue-on-error: true
 
       - name: Save main benchmark results
@@ -79,7 +126,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install dependencies for comparison
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Restore benchmark results
         run: |

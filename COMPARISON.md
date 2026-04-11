@@ -198,10 +198,10 @@ Run comparison benchmarks yourself:
 
 ```bash
 # Run all comparison benchmarks
-yarn test:compare
+pnpm test:compare
 
 # Run with detailed output
-yarn test:bench tests/comparison.bench.ts --reporter=verbose
+pnpm test:bench tests/comparison.bench.ts --reporter=verbose
 ```
 
 ---
