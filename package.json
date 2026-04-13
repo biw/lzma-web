@@ -72,10 +72,10 @@
   },
   "scripts": {
     "generate": "node scripts/generate-modules.js",
-    "prebuild": "yarn generate",
+    "prebuild": "node scripts/generate-modules.js",
     "build": "tsup",
     "test": "vitest run",
-    "test:electron": "yarn generate && yarn build && node scripts/test-electron-packaged.mjs",
+    "test:electron": "pnpm generate && pnpm build && node scripts/test-electron-packaged.mjs",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
@@ -87,7 +87,7 @@
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'",
     "type-check": "tsc --noEmit",
-    "prepack": "yarn build"
+    "prepack": "node scripts/generate-modules.js && tsup"
   },
   "license": "MIT",
   "keywords": [
@@ -95,5 +95,12 @@
     "compression",
     "decompression"
   ],
-  "packageManager": "yarn@4.10.3"
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lzma-native",
+      "msw"
+    ]
+  },
+  "packageManager": "pnpm@10.33.0"
 }

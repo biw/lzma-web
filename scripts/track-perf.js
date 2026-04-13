@@ -31,7 +31,7 @@ let exitCode = 0
 try {
   // Run benchmarks with default reporter
   // Capture both stdout and stderr since Vitest outputs to both
-  output = execSync('yarn test:bench 2>&1', {
+  output = execSync('pnpm test:bench 2>&1', {
     encoding: 'utf-8',
   })
 } catch (error) {

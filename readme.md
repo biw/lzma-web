@@ -9,7 +9,7 @@ The fastest isomorphic LZMA compression library for JavaScript. Works in browser
 
 ## Features
 
-- **Multiple APIs** - Promise-based, synchronous, callback-based, and Web Worker APIs
+- **Multiple APIs** - Promise-based, synchronous, and Web Worker APIs
 - **Tree-shakeable** - Import only compression or decompression to reduce bundle size
 - **TypeScript** - Full type definitions included
 - **Web Workers** - Automatic off-main-thread compression in browsers
@@ -265,7 +265,7 @@ const data = await decompress(serverResponse)
 
 ## Performance
 
-As of March 2026, lzma-web is the fastest isomorphic (browser + Node.js) LZMA library we could find. It consistently outperforms other pure-JS implementations by 2–5x across compression and decompression workloads.
+As of March 2026, lzma-web is the fastest isomorphic (browser + Electron + Node.js) LZMA library we could find. It consistently outperforms other pure-JS implementations by 2–5x across compression and decompression workloads.
 
 | Library | Type | Small text compress | Large text (~4 MB) compress | Small text decompress |
 |---------|------|--------------------:|----------------------------:|----------------------:|
@@ -279,7 +279,7 @@ All JS libraries benchmarked at compression level 1. Native solutions like `@nap
 
 ```bash
 # Run the comparison benchmarks yourself
-yarn test:bench
+pnpm test:bench
 ```
 
 ---
