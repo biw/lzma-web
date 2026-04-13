@@ -75,6 +75,7 @@
     "prebuild": "yarn generate",
     "build": "tsup",
     "test": "vitest run",
+    "test:electron": "yarn generate && yarn build && node scripts/test-electron-packaged.mjs",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",

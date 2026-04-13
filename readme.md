@@ -5,7 +5,7 @@
 [![bundlephobia][bundlephobia-badge]][bundlephobia]
 [![MIT License][license-badge]][license]
 
-The fastest isomorphic LZMA compression library for JavaScript. Works in browsers and Node.js with a tree-shakeable, Promise-based API and optional Web Worker support.
+The fastest isomorphic LZMA compression library for JavaScript. Works in browsers, Electron, and Node.js with a tree-shakeable, Promise-based API and optional Web Worker support.
 
 ## Features
 
@@ -13,7 +13,8 @@ The fastest isomorphic LZMA compression library for JavaScript. Works in browser
 - **Tree-shakeable** - Import only compression or decompression to reduce bundle size
 - **TypeScript** - Full type definitions included
 - **Web Workers** - Automatic off-main-thread compression in browsers
-- **Universal** - Works in browsers and Node.js
+- **Universal** - Works in browsers, Electron, and Node.js
+- **Electron-tested** - CI includes a packaged Electron smoke test with `asar`
 - **Compatible** - Output compatible with the reference LZMA implementation
 
 ## Installation
