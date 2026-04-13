@@ -24,6 +24,8 @@ benchmark-comparison.md
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+*.tgz
 
 .DS_Store
 .context/
+.attest/
