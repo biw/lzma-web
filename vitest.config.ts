@@ -6,7 +6,7 @@ export default defineConfig({
     globalSetup: ['tests/attest.setup.ts'],
     // Include all test files (*.test.ts and *.spec.ts), exclude benchmarks by default
     include: ['tests/**/*.{test,spec}.ts'],
-    // Benchmark files use *.bench.ts pattern (run with yarn test:bench)
+    // Benchmark files use *.bench.ts pattern (run with pnpm test:bench)
     benchmark: {
       include: ['tests/**/*.bench.ts'],
       outputJson: 'bench-results.json',

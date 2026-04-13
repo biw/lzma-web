@@ -9,7 +9,7 @@ This project includes several tools to track and measure test performance over t
 Run benchmarks and log timing data to a CSV file:
 
 ```bash
-yarn test:perf
+pnpm test:perf
 ```
 
 This will:
@@ -40,7 +40,7 @@ Example output:
 For more detailed performance testing of specific functions:
 
 ```bash
-yarn test:bench
+pnpm test:bench
 ```
 
 This benchmarks **all test files** across different scenarios:
@@ -57,7 +57,7 @@ Example output shows ops/second for each scenario, helping you spot performance 
 The default test command now shows detailed timing for each test:
 
 ```bash
-yarn test
+pnpm test
 ```
 
 With the verbose reporter enabled, you'll see:
@@ -82,9 +82,9 @@ Tests also output to `test-results.json` which can be used for CI/CD integration
 1. **Run `test:perf` before and after changes** to see the impact:
 
    ```bash
-   yarn test:perf  # Before changes
+   pnpm test:perf  # Before changes
    # Make your changes...
-   yarn test:perf  # After changes
+   pnpm test:perf  # After changes
    ```
 
 2. **Review the CSV file** to see trends over time:
@@ -172,13 +172,13 @@ You can test the comparison script locally:
 
 ```bash
 # Run benchmarks on your current branch
-yarn test:bench --reporter=json > pr-results.json
+pnpm test:bench --reporter=json > pr-results.json
 
 # Switch to main
 git checkout main
 
 # Run benchmarks on main
-yarn test:bench --reporter=json > main-results.json
+pnpm test:bench --reporter=json > main-results.json
 
 # Switch back
 git checkout -
