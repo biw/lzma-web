@@ -19,6 +19,8 @@ benchmark-comparison.md
 # pnpm
 .pnpm-store/
 pnpm-debug.log*
+*.tgz
 
 .DS_Store
 .context/
+.attest/

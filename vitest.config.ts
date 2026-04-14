@@ -3,6 +3,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     testTimeout: 90 * 1000,
+    globalSetup: ['tests/attest.setup.ts'],
     // Include all test files (*.test.ts and *.spec.ts), exclude benchmarks by default
     include: ['tests/**/*.{test,spec}.ts'],
     // Benchmark files use *.bench.ts pattern (run with pnpm test:bench)
@@ -30,7 +31,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: [
         'src/generated/**',
-        'src/worker.ts', // Worker entry point
+        'src/worker-thread.ts', // Worker entry point
       ],
     },
   },

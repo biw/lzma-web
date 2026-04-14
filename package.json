@@ -1,11 +1,7 @@
 {
   "name": "lzma-web",
-  "maintainers": [
-    "Ben Williams <git@biwills.com>"
-  ],
-  "author": "Nathan Rugg <nmrugg@gmail.com>",
   "description": "A JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm",
-  "version": "4.0.0-rc.4",
+  "version": "4.0.0-rc.5",
   "homepage": "https://github.com/biw/lzma-web",
   "repository": {
     "type": "git",
@@ -18,6 +14,22 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "sync": [
+        "dist/sync.d.ts"
+      ],
+      "worker": [
+        "dist/worker-api.d.ts"
+      ],
+      "compress": [
+        "dist/compress.d.ts"
+      ],
+      "decompress": [
+        "dist/decompress.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -49,6 +61,7 @@
     "dist"
   ],
   "devDependencies": {
+    "@ark/attest": "^0.56.0",
     "@eslint/js": "^9.38.0",
     "@napi-rs/lzma": "^1.4.5",
     "@sarakusha/lzma": "^2.3.4",
@@ -59,6 +72,7 @@
     "eslint": "9.38.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "esbuild": "^0.25.12",
     "happy-dom": "^20.0.11",
     "lzma": "^2.3.2",
     "lzma-native": "^8.0.6",

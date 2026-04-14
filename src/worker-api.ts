@@ -7,6 +7,7 @@
  * The Worker is lazily initialized on first use.
  */
 
+import { workerThreadSource } from './generated/worker-inline.js'
 import type { CompressMode, OnProgressCallback, WorkerLZMA } from './types.js'
 
 const ACTION_COMPRESS = 1
@@ -50,6 +51,7 @@ interface PendingCallback {
  */
 export function createWorkerLZMA(): WorkerLZMA {
   let worker: Worker | null = null
+  let workerUrl: string | null = null
   let callbackId = 0
   const pendingCallbacks: Map<number, PendingCallback> = new Map()
 
@@ -64,16 +66,10 @@ export function createWorkerLZMA(): WorkerLZMA {
       )
     }
 
-    // Detect development vs production environment for worker file extension
-    // - In Vite dev mode: URLs end with .ts or contain /@fs/ (Vite's file system route)
-    // - In production: bundled files use .js extension
-    // Note: This heuristic works with Vite/Rollup. Other bundlers may need adjustment.
-    const workerFile =
-      import.meta.url.endsWith('.ts') || import.meta.url.includes('/@fs/')
-        ? './worker.ts'
-        : './worker.js'
-    const url = new URL(workerFile, import.meta.url)
-    worker = new Worker(url, { type: 'module' })
+    workerUrl = URL.createObjectURL(
+      new Blob([workerThreadSource], { type: 'text/javascript' }),
+    )
+    worker = new Worker(workerUrl, { type: 'module' })
 
     worker.onmessage = (e: MessageEvent<WorkerMessage>) => {
       const { action, cbn, result, error } = e.data
@@ -187,6 +183,10 @@ export function createWorkerLZMA(): WorkerLZMA {
 
         worker.terminate()
         worker = null
+        if (workerUrl) {
+          URL.revokeObjectURL(workerUrl)
+          workerUrl = null
+        }
       }
     },
 
