@@ -1,0 +1,4 @@
+allowBuilds:
+  esbuild: true
+  lzma-native: true
+  msw: true

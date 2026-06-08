@@ -108,12 +108,5 @@
     "compression",
     "decompression"
   ],
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lzma-native",
-      "msw"
-    ]
-  },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@11.5.2"
 }
