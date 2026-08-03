@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename)
 
 const pathToFiles = path.join(__dirname, 'files')
 const files = fs.readdirSync(pathToFiles)
+const compressionModes = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 
 // Helper to run compression benchmark
 const benchCompress = (
@@ -40,14 +41,18 @@ const benchDecompress = (name: string, compressed: Buffer) => {
   )
 }
 
-// Benchmark all decompression operations
+// Error fixtures are correctness cases, not meaningful performance data. They
+// remain covered by tests/lzma.test.ts.
+const decompressionFiles = files.filter(
+  (file) => file.endsWith('.lzma') && !file.startsWith('error-'),
+)
+
+// Benchmark all successful decompression operations.
 describe('Decompression Performance', () => {
-  files
-    .filter((file) => file.endsWith('.lzma'))
-    .forEach((file) => {
-      const compressed = fs.readFileSync(path.join(pathToFiles, file))
-      benchDecompress(`decompress ${file}`, compressed)
-    })
+  decompressionFiles.forEach((file) => {
+    const compressed = fs.readFileSync(path.join(pathToFiles, file))
+    benchDecompress(`decompress ${file}`, compressed)
+  })
 })
 
 // Benchmark compression with different modes for key files
@@ -68,30 +73,10 @@ describe('Compression Performance - Various Modes', () => {
     const data = ext === '.txt' ? content.toString() : content
 
     describe(fileName, () => {
-      // Test different compression modes
-      ;[1, 5, 9].forEach((mode) => {
-        benchCompress(
-          `compress ${fileName} (mode ${mode})`,
-          data,
-          mode as 1 | 5 | 9,
-        )
+      // Exercise every public compression mode for each representative input.
+      compressionModes.forEach((mode) => {
+        benchCompress(`compress ${fileName} (mode ${mode})`, data, mode)
       })
     })
-  })
-})
-
-// Benchmark files with their designated compression levels
-describe('Compression Performance - Level Files', () => {
-  const levelFiles = files.filter((f) => f.match(/^level[_ ]\d$/i))
-
-  levelFiles.forEach((file) => {
-    const filePath = path.join(pathToFiles, file)
-    const content = fs.readFileSync(filePath)
-    const match = file.match(/^level[_ ](\d)/i)
-    const level = match
-      ? (Number(match[1]) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9)
-      : 1
-
-    benchCompress(`compress ${file} (mode ${level})`, content, level)
   })
 })

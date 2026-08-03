@@ -8,14 +8,26 @@
  * Format: { files: [{ filepath, groups: [{ fullName, benchmarks: [{ name, hz, mean, ... }] }] }] }
  */
 
-import fs from 'fs'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const mainResultsFile = 'main-results.json'
 const prResultsFile = 'pr-results.json'
 const outputFile = 'benchmark-comparison.md'
 
+// A benchmark name is only unique within its suite. Include the file as well so
+// equally named suites in different benchmark files remain distinct.
+function benchmarkId(filePath, suiteName, benchmarkName) {
+  return JSON.stringify([filePath, suiteName, benchmarkName])
+}
+
+function escapeMarkdown(value) {
+  return String(value).replaceAll('|', '\\|')
+}
+
 // Parse vitest benchmark.outputJson format
-function parseBenchmarkResults(filePath) {
+export function parseBenchmarkResults(filePath) {
   if (!fs.existsSync(filePath)) {
     console.error(`File not found: ${filePath}`)
     return null
@@ -35,7 +47,14 @@ function parseBenchmarkResults(filePath) {
     for (const file of data.files) {
       for (const group of file.groups || []) {
         for (const bench of group.benchmarks || []) {
-          benchmarks.set(bench.name, {
+          const benchmarkFile = file.filepath || '(unknown file)'
+          const suiteName = group.fullName || group.name || '(unnamed suite)'
+          const id = benchmarkId(benchmarkFile, suiteName, bench.name)
+
+          benchmarks.set(id, {
+            id,
+            filePath: benchmarkFile,
+            suiteName,
             name: bench.name,
             hz: bench.hz,
             mean: bench.mean,
@@ -79,11 +98,15 @@ function formatChange(change, better) {
 }
 
 // Main comparison logic
-function compareResults() {
+export function compareResults({
+  mainFile = mainResultsFile,
+  prFile = prResultsFile,
+  reportFile = outputFile,
+} = {}) {
   console.log('Comparing benchmark results...')
 
-  const mainResults = parseBenchmarkResults(mainResultsFile)
-  const prResults = parseBenchmarkResults(prResultsFile)
+  const mainResults = parseBenchmarkResults(mainFile)
+  const prResults = parseBenchmarkResults(prFile)
 
   if (!mainResults || !prResults) {
     console.error('Failed to parse benchmark results')
@@ -103,34 +126,35 @@ function compareResults() {
   markdown += `Comparing **${prResults.size}** benchmarks between \`main\` and this PR.\n\n`
   markdown += '### Performance Changes\n\n'
   markdown +=
-    '| Benchmark | Main (ops/sec) | PR (ops/sec) | Change | Mean (ms) | Change |\n'
+    '| File | Suite | Benchmark | Main (ops/sec) | PR (ops/sec) | Change | Mean (ms) | Change |\n'
   markdown +=
-    '|-----------|----------------|--------------|--------|-----------|--------|\n'
+    '|------|-------|-----------|----------------|--------------|--------|-----------|--------|\n'
 
   const changes = []
 
   // Compare common benchmarks
-  for (const [name, prData] of prResults.entries()) {
-    const mainData = mainResults.get(name)
+  for (const prData of prResults.values()) {
+    const mainData = mainResults.get(prData.id)
+    const rowPrefix = `| ${escapeMarkdown(prData.filePath)} | ${escapeMarkdown(prData.suiteName)} | ${escapeMarkdown(prData.name)}`
 
     if (!mainData) {
       // New benchmark in PR
-      markdown += `| ${name} | - | ${prData.hz.toFixed(2)} | 🆕 New | ${prData.mean.toFixed(2)} | - |\n`
+      markdown += `${rowPrefix} | - | ${prData.hz.toFixed(2)} | 🆕 New | ${prData.mean.toFixed(2)} | - |\n`
       continue
     }
 
     const hzChange = percentChange(mainData.hz, prData.hz)
     const meanChange = percentChange(mainData.mean, prData.mean)
 
-    changes.push({ name, hzChange, meanChange })
+    changes.push({ id: prData.id, hzChange, meanChange })
 
-    markdown += `| ${name} | ${mainData.hz.toFixed(2)} | ${prData.hz.toFixed(2)} | ${formatChange(hzChange, true)} | ${prData.mean.toFixed(2)} | ${formatChange(meanChange, false)} |\n`
+    markdown += `${rowPrefix} | ${mainData.hz.toFixed(2)} | ${prData.hz.toFixed(2)} | ${formatChange(hzChange, true)} | ${prData.mean.toFixed(2)} | ${formatChange(meanChange, false)} |\n`
   }
 
   // Check for removed benchmarks
-  for (const [name] of mainResults.entries()) {
-    if (!prResults.has(name)) {
-      markdown += `| ${name} | ${mainResults.get(name).hz.toFixed(2)} | - | ❌ Removed | - | - |\n`
+  for (const mainData of mainResults.values()) {
+    if (!prResults.has(mainData.id)) {
+      markdown += `| ${escapeMarkdown(mainData.filePath)} | ${escapeMarkdown(mainData.suiteName)} | ${escapeMarkdown(mainData.name)} | ${mainData.hz.toFixed(2)} | - | ❌ Removed | - | - |\n`
     }
   }
 
@@ -143,7 +167,7 @@ function compareResults() {
     const neutral = changes.length - improvements - regressions
 
     markdown += '\n### Summary\n\n'
-    markdown += `- **Average performance change**: ${formatChange(avgHzChange, true)}\n`
+    markdown += `- **Average scenario performance change**: ${formatChange(avgHzChange, true)}\n`
     markdown += `- **Improvements** (>1%): ${improvements}\n`
     markdown += `- **Regressions** (<-1%): ${regressions}\n`
     markdown += `- **Neutral** (±1%): ${neutral}\n`
@@ -161,12 +185,18 @@ function compareResults() {
     '*Benchmarks run with Vitest. Lower mean time and higher ops/sec are better.*\n'
 
   // Write output
-  fs.writeFileSync(outputFile, markdown)
-  console.log(`Comparison written to ${outputFile}`)
+  fs.writeFileSync(reportFile, markdown)
+  console.log(`Comparison written to ${reportFile}`)
 
   return true
 }
 
-// Run comparison
-const success = compareResults()
-process.exit(success ? 0 : 1)
+// Run comparison when invoked directly, but keep the parser and comparison
+// callable from tests.
+const invokedFile = process.argv[1] && path.resolve(process.argv[1])
+const currentFile = fileURLToPath(import.meta.url)
+
+if (invokedFile === currentFile) {
+  const success = compareResults()
+  process.exit(success ? 0 : 1)
+}

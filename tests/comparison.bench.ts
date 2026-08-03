@@ -43,9 +43,10 @@ const binaryData = fs.existsSync(binaryPath)
       Array.from({ length: 500 }, () => Math.floor(Math.random() * 256)),
     )
 
-// Pre-compress data for decompression benchmarks
-let smallTextCompressed: Uint8Array
-let largeTextCompressed: Uint8Array
+// Pre-compress data only for the decompression suites that need it. This keeps
+// compression-only benchmark jobs from paying the large-text setup cost.
+let smallTextCompressed: Uint8Array | undefined
+let largeTextCompressed: Uint8Array | undefined
 
 // Compression mode for LZMA (use mode 1 for speed in benchmarks)
 const LZMA_MODE = 1
@@ -162,11 +163,15 @@ try {
 // Pre-compress data for decompression benchmarks
 // ============================================================================
 
-beforeAll(async () => {
-  // Pre-compress with lzma-web
-  smallTextCompressed = compressSync(smallText, LZMA_MODE)
-  largeTextCompressed = compressSync(largeText, LZMA_MODE)
-})
+const getSmallTextCompressed = () => {
+  smallTextCompressed ??= compressSync(smallText, LZMA_MODE)
+  return smallTextCompressed
+}
+
+const getLargeTextCompressed = () => {
+  largeTextCompressed ??= compressSync(largeText, LZMA_MODE)
+  return largeTextCompressed
+}
 
 // ============================================================================
 // lzma-web Execution Modes - Small Text
@@ -206,10 +211,14 @@ describe('lzma-web Execution Modes - Small Text Compression', () => {
 })
 
 describe('lzma-web Execution Modes - Small Text Decompression', () => {
+  beforeAll(() => {
+    getSmallTextCompressed()
+  })
+
   bench(
     'lzma-web sync',
     () => {
-      decompressSync(smallTextCompressed)
+      decompressSync(getSmallTextCompressed())
     },
     benchOptions,
   )
@@ -217,7 +226,7 @@ describe('lzma-web Execution Modes - Small Text Decompression', () => {
   bench(
     'lzma-web async',
     async () => {
-      await lzmaWebDecompress(smallTextCompressed)
+      await lzmaWebDecompress(getSmallTextCompressed())
     },
     benchOptions,
   )
@@ -228,7 +237,7 @@ describe('lzma-web Execution Modes - Small Text Decompression', () => {
       async () => {
         const worker = createWorkerLZMA()
         try {
-          await worker.decompress(smallTextCompressed)
+          await worker.decompress(getSmallTextCompressed())
         } finally {
           worker.terminate()
         }
@@ -276,10 +285,14 @@ describe('lzma-web Execution Modes - Large Text Compression', () => {
 })
 
 describe('lzma-web Execution Modes - Large Text Decompression', () => {
+  beforeAll(() => {
+    getLargeTextCompressed()
+  })
+
   bench(
     'lzma-web sync',
     () => {
-      decompressSync(largeTextCompressed)
+      decompressSync(getLargeTextCompressed())
     },
     benchOptions,
   )
@@ -287,7 +300,7 @@ describe('lzma-web Execution Modes - Large Text Decompression', () => {
   bench(
     'lzma-web async',
     async () => {
-      await lzmaWebDecompress(largeTextCompressed)
+      await lzmaWebDecompress(getLargeTextCompressed())
     },
     benchOptions,
   )
@@ -298,7 +311,7 @@ describe('lzma-web Execution Modes - Large Text Decompression', () => {
       async () => {
         const worker = createWorkerLZMA()
         try {
-          await worker.decompress(largeTextCompressed)
+          await worker.decompress(getLargeTextCompressed())
         } finally {
           worker.terminate()
         }
@@ -421,10 +434,14 @@ describe('LZMA Library Comparison - Large Text Compression', () => {
 // ============================================================================
 
 describe('LZMA Library Comparison - Small Text Decompression', () => {
+  beforeAll(() => {
+    getSmallTextCompressed()
+  })
+
   bench(
     'lzma-web (sync)',
     () => {
-      decompressSync(smallTextCompressed)
+      decompressSync(getSmallTextCompressed())
     },
     benchOptions,
   )
@@ -433,7 +450,7 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
     bench(
       '@sarakusha/lzma',
       async () => {
-        await sarakushaLzma!.decompress(smallTextCompressed)
+        await sarakushaLzma!.decompress(getSmallTextCompressed())
       },
       benchOptions,
     )
@@ -443,7 +460,7 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
     bench(
       'lzma (original)',
       async () => {
-        await originalLzma!.decompress(smallTextCompressed)
+        await originalLzma!.decompress(getSmallTextCompressed())
       },
       benchOptions,
     )
@@ -453,7 +470,7 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
     bench(
       '@napi-rs/lzma',
       async () => {
-        await napiLzma!.decompress(Buffer.from(smallTextCompressed))
+        await napiLzma!.decompress(Buffer.from(getSmallTextCompressed()))
       },
       benchOptions,
     )
@@ -463,7 +480,7 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
     bench(
       'lzma-native',
       async () => {
-        await lzmaNative!.decompress(Buffer.from(smallTextCompressed))
+        await lzmaNative!.decompress(Buffer.from(getSmallTextCompressed()))
       },
       benchOptions,
     )
@@ -475,10 +492,14 @@ describe('LZMA Library Comparison - Small Text Decompression', () => {
 // ============================================================================
 
 describe('LZMA Library Comparison - Large Text Decompression', () => {
+  beforeAll(() => {
+    getLargeTextCompressed()
+  })
+
   bench(
     'lzma-web (sync)',
     () => {
-      decompressSync(largeTextCompressed)
+      decompressSync(getLargeTextCompressed())
     },
     benchOptions,
   )
@@ -487,7 +508,7 @@ describe('LZMA Library Comparison - Large Text Decompression', () => {
     bench(
       '@sarakusha/lzma',
       async () => {
-        await sarakushaLzma!.decompress(largeTextCompressed)
+        await sarakushaLzma!.decompress(getLargeTextCompressed())
       },
       benchOptions,
     )
@@ -497,7 +518,7 @@ describe('LZMA Library Comparison - Large Text Decompression', () => {
     bench(
       'lzma (original)',
       async () => {
-        await originalLzma!.decompress(largeTextCompressed)
+        await originalLzma!.decompress(getLargeTextCompressed())
       },
       benchOptions,
     )
@@ -507,7 +528,7 @@ describe('LZMA Library Comparison - Large Text Decompression', () => {
     bench(
       '@napi-rs/lzma',
       async () => {
-        await napiLzma!.decompress(Buffer.from(largeTextCompressed))
+        await napiLzma!.decompress(Buffer.from(getLargeTextCompressed()))
       },
       benchOptions,
     )
@@ -517,7 +538,7 @@ describe('LZMA Library Comparison - Large Text Decompression', () => {
     bench(
       'lzma-native',
       async () => {
-        await lzmaNative!.decompress(Buffer.from(largeTextCompressed))
+        await lzmaNative!.decompress(Buffer.from(getLargeTextCompressed()))
       },
       benchOptions,
     )
