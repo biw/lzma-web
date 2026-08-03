@@ -12,6 +12,8 @@ jobs:
   benchmark:
     name: ${{ matrix.label }}
     runs-on: ubuntu-latest
+    env:
+      BENCHMARK_GROUP: ${{ matrix.benchmark_group }}
     strategy:
       fail-fast: false
       max-parallel: 30
@@ -20,123 +22,123 @@ jobs:
           - id: decompress-binary
             label: Decompress binary
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress binary\.lzma'
+            benchmark_group: 'decompress:binary.lzma'
           - id: decompress-chinese
             label: Decompress Chinese text
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress chinese\.txt\.lzma'
+            benchmark_group: 'decompress:chinese.txt.lzma'
           - id: decompress-large-kjv
             label: Decompress large KJV text
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress large-kjv\.txt\.lzma'
+            benchmark_group: 'decompress:large-kjv.txt.lzma'
           - id: decompress-large-random-binary
             label: Decompress large random binary
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress large-random_binary\.lzma'
+            benchmark_group: 'decompress:large-random_binary.lzma'
           - id: decompress-level-1
             label: Decompress level 1 fixture
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress level 1\.lzma'
+            benchmark_group: 'decompress:level 1.lzma'
           - id: decompress-level-2
             label: Decompress level 2 fixture
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress level 2\.lzma'
+            benchmark_group: 'decompress:level 2.lzma'
           - id: decompress-level-3
             label: Decompress level 3 fixture
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress level 3\.lzma'
+            benchmark_group: 'decompress:level 3.lzma'
           - id: decompress-level-4
             label: Decompress level 4 fixture
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress level 4\.lzma'
+            benchmark_group: 'decompress:level 4.lzma'
           - id: decompress-level-5
             label: Decompress level 5 fixture
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress level 5\.lzma'
+            benchmark_group: 'decompress:level 5.lzma'
           - id: decompress-level-6
             label: Decompress level 6 fixture
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress level 6\.lzma'
+            benchmark_group: 'decompress:level 6.lzma'
           - id: decompress-level-7
             label: Decompress level 7 fixture
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress level 7\.lzma'
+            benchmark_group: 'decompress:level 7.lzma'
           - id: decompress-level-8
             label: Decompress level 8 fixture
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress level 8\.lzma'
+            benchmark_group: 'decompress:level 8.lzma'
           - id: decompress-level-9
             label: Decompress level 9 fixture
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress level 9\.lzma'
+            benchmark_group: 'decompress:level 9.lzma'
           - id: decompress-no-progress
             label: Decompress no-progress text
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress no_progress\.txt\.lzma'
+            benchmark_group: 'decompress:no_progress.txt.lzma'
           - id: decompress-sample-text
             label: Decompress sample text
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress sample_text\.txt\.lzma'
+            benchmark_group: 'decompress:sample_text.txt.lzma'
           - id: decompress-timeseries
             label: Decompress time-series text
             file: tests/compression.bench.ts
-            test_name_pattern: 'decompress timeseries\.txt\.lzma'
+            benchmark_group: 'decompress:timeseries.txt.lzma'
           - id: compress-sample-text
             label: Compress sample text at every mode
             file: tests/compression.bench.ts
-            test_name_pattern: 'compress sample_text\.txt'
+            benchmark_group: 'compress:sample_text.txt'
           - id: compress-chinese
             label: Compress Chinese text at every mode
             file: tests/compression.bench.ts
-            test_name_pattern: 'compress chinese\.txt'
+            benchmark_group: 'compress:chinese.txt'
           - id: compress-binary
             label: Compress binary data at every mode
             file: tests/compression.bench.ts
-            test_name_pattern: 'compress binary'
+            benchmark_group: 'compress:binary'
           - id: compress-timeseries
             label: Compress time-series text at every mode
             file: tests/compression.bench.ts
-            test_name_pattern: 'compress timeseries\.txt'
+            benchmark_group: 'compress:timeseries.txt'
           - id: execution-small-compression
             label: Execution modes for small-text compression
             file: tests/comparison.bench.ts
-            test_name_pattern: 'lzma-web Execution Modes - Small Text Compression'
+            benchmark_group: 'comparison:execution-small-compression'
           - id: execution-small-decompression
             label: Execution modes for small-text decompression
             file: tests/comparison.bench.ts
-            test_name_pattern: 'lzma-web Execution Modes - Small Text Decompression'
+            benchmark_group: 'comparison:execution-small-decompression'
           - id: execution-large-compression
             label: Execution modes for large-text compression
             file: tests/comparison.bench.ts
-            test_name_pattern: 'lzma-web Execution Modes - Large Text Compression'
+            benchmark_group: 'comparison:execution-large-compression'
           - id: execution-large-decompression
             label: Execution modes for large-text decompression
             file: tests/comparison.bench.ts
-            test_name_pattern: 'lzma-web Execution Modes - Large Text Decompression'
+            benchmark_group: 'comparison:execution-large-decompression'
           - id: libraries-small-compression
             label: Libraries for small-text compression
             file: tests/comparison.bench.ts
-            test_name_pattern: 'LZMA Library Comparison - Small Text Compression'
+            benchmark_group: 'comparison:libraries-small-compression'
           - id: libraries-large-compression
             label: Libraries for large-text compression
             file: tests/comparison.bench.ts
-            test_name_pattern: 'LZMA Library Comparison - Large Text Compression'
+            benchmark_group: 'comparison:libraries-large-compression'
           - id: libraries-small-decompression
             label: Libraries for small-text decompression
             file: tests/comparison.bench.ts
-            test_name_pattern: 'LZMA Library Comparison - Small Text Decompression'
+            benchmark_group: 'comparison:libraries-small-decompression'
           - id: libraries-large-decompression
             label: Libraries for large-text decompression
             file: tests/comparison.bench.ts
-            test_name_pattern: 'LZMA Library Comparison - Large Text Decompression'
+            benchmark_group: 'comparison:libraries-large-decompression'
           - id: libraries-binary-compression
             label: Libraries for binary compression
             file: tests/comparison.bench.ts
-            test_name_pattern: 'LZMA Library Comparison - Binary Data Compression'
+            benchmark_group: 'comparison:libraries-binary-compression'
           - id: compression-ratio
             label: Compression-ratio report
             file: tests/comparison.bench.ts
-            test_name_pattern: 'LZMA Compression Ratio by Mode'
+            benchmark_group: 'comparison:compression-ratio'
 
     steps:
       - name: Checkout PR
@@ -164,13 +166,16 @@ jobs:
         run: pnpm generate
 
       - name: Run benchmarks on PR branch
-        run: pnpm test:bench "${{ matrix.file }}" --testNamePattern "${{ matrix.test_name_pattern }}" || true
+        run: pnpm test:bench "${{ matrix.file }}" || true
 
       - name: Save PR benchmark results
         run: |
           if [ -f bench-results.json ]; then
             cp bench-results.json /tmp/pr-results.json
           fi
+
+      - name: Save selected benchmark harness
+        run: cp "${{ matrix.file }}" /tmp/selected-benchmark.bench.ts
 
       - name: Checkout main branch
         run: |
@@ -224,17 +229,20 @@ jobs:
             sed -i "s/include: \['tests\/\*\*\/\*.bench.ts'\]/include: ['tests\/\*\*\/*.bench.ts'], outputJson: 'bench-results.json'/" vitest.config.ts || true
           fi
 
+      - name: Restore selected benchmark harness
+        run: cp /tmp/selected-benchmark.bench.ts "${{ matrix.file }}"
+
       - name: Run benchmarks on main branch with pnpm
-        run: pnpm test:bench "${{ matrix.file }}" --testNamePattern "${{ matrix.test_name_pattern }}" || true
+        run: pnpm test:bench "${{ matrix.file }}" || true
         if: env.MAIN_PACKAGE_MANAGER == 'pnpm'
 
       - name: Run benchmarks on main branch with Yarn
         if: env.MAIN_PACKAGE_MANAGER == 'yarn'
-        run: corepack yarn test:bench "${{ matrix.file }}" --testNamePattern "${{ matrix.test_name_pattern }}" || true
+        run: corepack yarn test:bench "${{ matrix.file }}" || true
 
       - name: Run benchmarks on main branch with npm
         if: env.MAIN_PACKAGE_MANAGER == 'npm'
-        run: npm run test:bench -- "${{ matrix.file }}" --testNamePattern "${{ matrix.test_name_pattern }}" || true
+        run: npm run test:bench -- "${{ matrix.file }}" || true
 
       - name: Save main benchmark results
         run: |
@@ -336,7 +344,16 @@ jobs:
             }
 
             const timestamp = new Date().toISOString();
-            body = `${COMMENT_MARKER}\n${body}\n\n<sub>Last updated: ${timestamp}</sub>`;
+            const suffix = `\n\n<sub>Last updated: ${timestamp}</sub>`;
+            const truncationNotice = '\n\n*Report truncated to fit GitHub’s comment limit; the full reports are available as workflow artifacts.*';
+            const maxCommentLength = 65_000;
+            const availableBodyLength = maxCommentLength - COMMENT_MARKER.length - suffix.length - 1;
+
+            if (body.length > availableBodyLength) {
+              body = `${body.slice(0, availableBodyLength - truncationNotice.length)}${truncationNotice}`;
+            }
+
+            body = `${COMMENT_MARKER}\n${body}${suffix}`;
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,

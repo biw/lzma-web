@@ -53,6 +53,10 @@ const LZMA_MODE = 1
 
 // Benchmark options
 const benchOptions = { time: 3000, iterations: 5 }
+const benchmarkGroup = process.env.BENCHMARK_GROUP
+
+const shouldRunGroup = (group: string) =>
+  !benchmarkGroup || benchmarkGroup === group
 
 // Check if Workers are available (browser environment)
 const hasWorkers = typeof Worker !== 'undefined'
@@ -177,436 +181,466 @@ const getLargeTextCompressed = () => {
 // lzma-web Execution Modes - Small Text
 // ============================================================================
 
-describe('lzma-web Execution Modes - Small Text Compression', () => {
-  bench(
-    'lzma-web sync',
-    () => {
-      compressSync(smallText, LZMA_MODE)
-    },
-    benchOptions,
-  )
-
-  bench(
-    'lzma-web async',
-    async () => {
-      await lzmaWebCompress(smallText, LZMA_MODE)
-    },
-    benchOptions,
-  )
-
-  if (hasWorkers) {
+describe.skipIf(!shouldRunGroup('comparison:execution-small-compression'))(
+  'lzma-web Execution Modes - Small Text Compression',
+  () => {
     bench(
-      'lzma-web worker',
-      async () => {
-        const worker = createWorkerLZMA()
-        try {
-          await worker.compress(smallText, LZMA_MODE)
-        } finally {
-          worker.terminate()
-        }
+      'lzma-web sync',
+      () => {
+        compressSync(smallText, LZMA_MODE)
       },
       benchOptions,
     )
-  }
-})
 
-describe('lzma-web Execution Modes - Small Text Decompression', () => {
-  beforeAll(() => {
-    getSmallTextCompressed()
-  })
-
-  bench(
-    'lzma-web sync',
-    () => {
-      decompressSync(getSmallTextCompressed())
-    },
-    benchOptions,
-  )
-
-  bench(
-    'lzma-web async',
-    async () => {
-      await lzmaWebDecompress(getSmallTextCompressed())
-    },
-    benchOptions,
-  )
-
-  if (hasWorkers) {
     bench(
-      'lzma-web worker',
+      'lzma-web async',
       async () => {
-        const worker = createWorkerLZMA()
-        try {
-          await worker.decompress(getSmallTextCompressed())
-        } finally {
-          worker.terminate()
-        }
+        await lzmaWebCompress(smallText, LZMA_MODE)
       },
       benchOptions,
     )
-  }
-})
+
+    if (hasWorkers) {
+      bench(
+        'lzma-web worker',
+        async () => {
+          const worker = createWorkerLZMA()
+          try {
+            await worker.compress(smallText, LZMA_MODE)
+          } finally {
+            worker.terminate()
+          }
+        },
+        benchOptions,
+      )
+    }
+  },
+)
+
+describe.skipIf(!shouldRunGroup('comparison:execution-small-decompression'))(
+  'lzma-web Execution Modes - Small Text Decompression',
+  () => {
+    beforeAll(() => {
+      getSmallTextCompressed()
+    })
+
+    bench(
+      'lzma-web sync',
+      () => {
+        decompressSync(getSmallTextCompressed())
+      },
+      benchOptions,
+    )
+
+    bench(
+      'lzma-web async',
+      async () => {
+        await lzmaWebDecompress(getSmallTextCompressed())
+      },
+      benchOptions,
+    )
+
+    if (hasWorkers) {
+      bench(
+        'lzma-web worker',
+        async () => {
+          const worker = createWorkerLZMA()
+          try {
+            await worker.decompress(getSmallTextCompressed())
+          } finally {
+            worker.terminate()
+          }
+        },
+        benchOptions,
+      )
+    }
+  },
+)
 
 // ============================================================================
 // lzma-web Execution Modes - Large Text
 // ============================================================================
 
-describe('lzma-web Execution Modes - Large Text Compression', () => {
-  bench(
-    'lzma-web sync',
-    () => {
-      compressSync(largeText, LZMA_MODE)
-    },
-    benchOptions,
-  )
-
-  bench(
-    'lzma-web async',
-    async () => {
-      await lzmaWebCompress(largeText, LZMA_MODE)
-    },
-    benchOptions,
-  )
-
-  if (hasWorkers) {
+describe.skipIf(!shouldRunGroup('comparison:execution-large-compression'))(
+  'lzma-web Execution Modes - Large Text Compression',
+  () => {
     bench(
-      'lzma-web worker',
-      async () => {
-        const worker = createWorkerLZMA()
-        try {
-          await worker.compress(largeText, LZMA_MODE)
-        } finally {
-          worker.terminate()
-        }
+      'lzma-web sync',
+      () => {
+        compressSync(largeText, LZMA_MODE)
       },
       benchOptions,
     )
-  }
-})
 
-describe('lzma-web Execution Modes - Large Text Decompression', () => {
-  beforeAll(() => {
-    getLargeTextCompressed()
-  })
-
-  bench(
-    'lzma-web sync',
-    () => {
-      decompressSync(getLargeTextCompressed())
-    },
-    benchOptions,
-  )
-
-  bench(
-    'lzma-web async',
-    async () => {
-      await lzmaWebDecompress(getLargeTextCompressed())
-    },
-    benchOptions,
-  )
-
-  if (hasWorkers) {
     bench(
-      'lzma-web worker',
+      'lzma-web async',
       async () => {
-        const worker = createWorkerLZMA()
-        try {
-          await worker.decompress(getLargeTextCompressed())
-        } finally {
-          worker.terminate()
-        }
+        await lzmaWebCompress(largeText, LZMA_MODE)
       },
       benchOptions,
     )
-  }
-})
+
+    if (hasWorkers) {
+      bench(
+        'lzma-web worker',
+        async () => {
+          const worker = createWorkerLZMA()
+          try {
+            await worker.compress(largeText, LZMA_MODE)
+          } finally {
+            worker.terminate()
+          }
+        },
+        benchOptions,
+      )
+    }
+  },
+)
+
+describe.skipIf(!shouldRunGroup('comparison:execution-large-decompression'))(
+  'lzma-web Execution Modes - Large Text Decompression',
+  () => {
+    beforeAll(() => {
+      getLargeTextCompressed()
+    })
+
+    bench(
+      'lzma-web sync',
+      () => {
+        decompressSync(getLargeTextCompressed())
+      },
+      benchOptions,
+    )
+
+    bench(
+      'lzma-web async',
+      async () => {
+        await lzmaWebDecompress(getLargeTextCompressed())
+      },
+      benchOptions,
+    )
+
+    if (hasWorkers) {
+      bench(
+        'lzma-web worker',
+        async () => {
+          const worker = createWorkerLZMA()
+          try {
+            await worker.decompress(getLargeTextCompressed())
+          } finally {
+            worker.terminate()
+          }
+        },
+        benchOptions,
+      )
+    }
+  },
+)
 
 // ============================================================================
 // LZMA Library Comparison - Small Text Compression
 // ============================================================================
 
-describe('LZMA Library Comparison - Small Text Compression', () => {
-  bench(
-    'lzma-web (sync)',
-    () => {
-      compressSync(smallText, LZMA_MODE)
-    },
-    benchOptions,
-  )
-
-  if (sarakushaLzma) {
+describe.skipIf(!shouldRunGroup('comparison:libraries-small-compression'))(
+  'LZMA Library Comparison - Small Text Compression',
+  () => {
     bench(
-      '@sarakusha/lzma',
-      async () => {
-        await sarakushaLzma!.compress(smallText, LZMA_MODE)
+      'lzma-web (sync)',
+      () => {
+        compressSync(smallText, LZMA_MODE)
       },
       benchOptions,
     )
-  }
 
-  if (originalLzma) {
-    bench(
-      'lzma (original)',
-      async () => {
-        await originalLzma!.compress(smallText, LZMA_MODE)
-      },
-      benchOptions,
-    )
-  }
+    if (sarakushaLzma) {
+      bench(
+        '@sarakusha/lzma',
+        async () => {
+          await sarakushaLzma!.compress(smallText, LZMA_MODE)
+        },
+        benchOptions,
+      )
+    }
 
-  if (napiLzma) {
-    bench(
-      '@napi-rs/lzma',
-      async () => {
-        await napiLzma!.compress(Buffer.from(smallText))
-      },
-      benchOptions,
-    )
-  }
+    if (originalLzma) {
+      bench(
+        'lzma (original)',
+        async () => {
+          await originalLzma!.compress(smallText, LZMA_MODE)
+        },
+        benchOptions,
+      )
+    }
 
-  if (lzmaNative) {
-    bench(
-      'lzma-native',
-      async () => {
-        await lzmaNative!.compress(smallText)
-      },
-      benchOptions,
-    )
-  }
-})
+    if (napiLzma) {
+      bench(
+        '@napi-rs/lzma',
+        async () => {
+          await napiLzma!.compress(Buffer.from(smallText))
+        },
+        benchOptions,
+      )
+    }
+
+    if (lzmaNative) {
+      bench(
+        'lzma-native',
+        async () => {
+          await lzmaNative!.compress(smallText)
+        },
+        benchOptions,
+      )
+    }
+  },
+)
 
 // ============================================================================
 // LZMA Library Comparison - Large Text Compression
 // ============================================================================
 
-describe('LZMA Library Comparison - Large Text Compression', () => {
-  bench(
-    'lzma-web (sync)',
-    () => {
-      compressSync(largeText, LZMA_MODE)
-    },
-    benchOptions,
-  )
-
-  if (sarakushaLzma) {
+describe.skipIf(!shouldRunGroup('comparison:libraries-large-compression'))(
+  'LZMA Library Comparison - Large Text Compression',
+  () => {
     bench(
-      '@sarakusha/lzma',
-      async () => {
-        await sarakushaLzma!.compress(largeText, LZMA_MODE)
+      'lzma-web (sync)',
+      () => {
+        compressSync(largeText, LZMA_MODE)
       },
       benchOptions,
     )
-  }
 
-  if (originalLzma) {
-    bench(
-      'lzma (original)',
-      async () => {
-        await originalLzma!.compress(largeText, LZMA_MODE)
-      },
-      benchOptions,
-    )
-  }
+    if (sarakushaLzma) {
+      bench(
+        '@sarakusha/lzma',
+        async () => {
+          await sarakushaLzma!.compress(largeText, LZMA_MODE)
+        },
+        benchOptions,
+      )
+    }
 
-  if (napiLzma) {
-    bench(
-      '@napi-rs/lzma',
-      async () => {
-        await napiLzma!.compress(Buffer.from(largeText))
-      },
-      benchOptions,
-    )
-  }
+    if (originalLzma) {
+      bench(
+        'lzma (original)',
+        async () => {
+          await originalLzma!.compress(largeText, LZMA_MODE)
+        },
+        benchOptions,
+      )
+    }
 
-  if (lzmaNative) {
-    bench(
-      'lzma-native',
-      async () => {
-        await lzmaNative!.compress(largeText)
-      },
-      benchOptions,
-    )
-  }
-})
+    if (napiLzma) {
+      bench(
+        '@napi-rs/lzma',
+        async () => {
+          await napiLzma!.compress(Buffer.from(largeText))
+        },
+        benchOptions,
+      )
+    }
+
+    if (lzmaNative) {
+      bench(
+        'lzma-native',
+        async () => {
+          await lzmaNative!.compress(largeText)
+        },
+        benchOptions,
+      )
+    }
+  },
+)
 
 // ============================================================================
 // LZMA Library Comparison - Small Text Decompression
 // ============================================================================
 
-describe('LZMA Library Comparison - Small Text Decompression', () => {
-  beforeAll(() => {
-    getSmallTextCompressed()
-  })
+describe.skipIf(!shouldRunGroup('comparison:libraries-small-decompression'))(
+  'LZMA Library Comparison - Small Text Decompression',
+  () => {
+    beforeAll(() => {
+      getSmallTextCompressed()
+    })
 
-  bench(
-    'lzma-web (sync)',
-    () => {
-      decompressSync(getSmallTextCompressed())
-    },
-    benchOptions,
-  )
-
-  if (sarakushaLzma) {
     bench(
-      '@sarakusha/lzma',
-      async () => {
-        await sarakushaLzma!.decompress(getSmallTextCompressed())
+      'lzma-web (sync)',
+      () => {
+        decompressSync(getSmallTextCompressed())
       },
       benchOptions,
     )
-  }
 
-  if (originalLzma) {
-    bench(
-      'lzma (original)',
-      async () => {
-        await originalLzma!.decompress(getSmallTextCompressed())
-      },
-      benchOptions,
-    )
-  }
+    if (sarakushaLzma) {
+      bench(
+        '@sarakusha/lzma',
+        async () => {
+          await sarakushaLzma!.decompress(getSmallTextCompressed())
+        },
+        benchOptions,
+      )
+    }
 
-  if (napiLzma) {
-    bench(
-      '@napi-rs/lzma',
-      async () => {
-        await napiLzma!.decompress(Buffer.from(getSmallTextCompressed()))
-      },
-      benchOptions,
-    )
-  }
+    if (originalLzma) {
+      bench(
+        'lzma (original)',
+        async () => {
+          await originalLzma!.decompress(getSmallTextCompressed())
+        },
+        benchOptions,
+      )
+    }
 
-  if (lzmaNative) {
-    bench(
-      'lzma-native',
-      async () => {
-        await lzmaNative!.decompress(Buffer.from(getSmallTextCompressed()))
-      },
-      benchOptions,
-    )
-  }
-})
+    if (napiLzma) {
+      bench(
+        '@napi-rs/lzma',
+        async () => {
+          await napiLzma!.decompress(Buffer.from(getSmallTextCompressed()))
+        },
+        benchOptions,
+      )
+    }
+
+    if (lzmaNative) {
+      bench(
+        'lzma-native',
+        async () => {
+          await lzmaNative!.decompress(Buffer.from(getSmallTextCompressed()))
+        },
+        benchOptions,
+      )
+    }
+  },
+)
 
 // ============================================================================
 // LZMA Library Comparison - Large Text Decompression
 // ============================================================================
 
-describe('LZMA Library Comparison - Large Text Decompression', () => {
-  beforeAll(() => {
-    getLargeTextCompressed()
-  })
+describe.skipIf(!shouldRunGroup('comparison:libraries-large-decompression'))(
+  'LZMA Library Comparison - Large Text Decompression',
+  () => {
+    beforeAll(() => {
+      getLargeTextCompressed()
+    })
 
-  bench(
-    'lzma-web (sync)',
-    () => {
-      decompressSync(getLargeTextCompressed())
-    },
-    benchOptions,
-  )
-
-  if (sarakushaLzma) {
     bench(
-      '@sarakusha/lzma',
-      async () => {
-        await sarakushaLzma!.decompress(getLargeTextCompressed())
+      'lzma-web (sync)',
+      () => {
+        decompressSync(getLargeTextCompressed())
       },
       benchOptions,
     )
-  }
 
-  if (originalLzma) {
-    bench(
-      'lzma (original)',
-      async () => {
-        await originalLzma!.decompress(getLargeTextCompressed())
-      },
-      benchOptions,
-    )
-  }
+    if (sarakushaLzma) {
+      bench(
+        '@sarakusha/lzma',
+        async () => {
+          await sarakushaLzma!.decompress(getLargeTextCompressed())
+        },
+        benchOptions,
+      )
+    }
 
-  if (napiLzma) {
-    bench(
-      '@napi-rs/lzma',
-      async () => {
-        await napiLzma!.decompress(Buffer.from(getLargeTextCompressed()))
-      },
-      benchOptions,
-    )
-  }
+    if (originalLzma) {
+      bench(
+        'lzma (original)',
+        async () => {
+          await originalLzma!.decompress(getLargeTextCompressed())
+        },
+        benchOptions,
+      )
+    }
 
-  if (lzmaNative) {
-    bench(
-      'lzma-native',
-      async () => {
-        await lzmaNative!.decompress(Buffer.from(getLargeTextCompressed()))
-      },
-      benchOptions,
-    )
-  }
-})
+    if (napiLzma) {
+      bench(
+        '@napi-rs/lzma',
+        async () => {
+          await napiLzma!.decompress(Buffer.from(getLargeTextCompressed()))
+        },
+        benchOptions,
+      )
+    }
+
+    if (lzmaNative) {
+      bench(
+        'lzma-native',
+        async () => {
+          await lzmaNative!.decompress(Buffer.from(getLargeTextCompressed()))
+        },
+        benchOptions,
+      )
+    }
+  },
+)
 
 // ============================================================================
 // LZMA Library Comparison - Binary Data Compression
 // ============================================================================
 
-describe('LZMA Library Comparison - Binary Data Compression', () => {
-  bench(
-    'lzma-web (sync)',
-    () => {
-      compressSync(binaryData, LZMA_MODE)
-    },
-    benchOptions,
-  )
-
-  if (napiLzma) {
+describe.skipIf(!shouldRunGroup('comparison:libraries-binary-compression'))(
+  'LZMA Library Comparison - Binary Data Compression',
+  () => {
     bench(
-      '@napi-rs/lzma',
-      async () => {
-        await napiLzma!.compress(binaryData)
+      'lzma-web (sync)',
+      () => {
+        compressSync(binaryData, LZMA_MODE)
       },
       benchOptions,
     )
-  }
 
-  if (lzmaNative) {
-    bench(
-      'lzma-native',
-      async () => {
-        await lzmaNative!.compress(binaryData)
-      },
-      benchOptions,
-    )
-  }
-})
+    if (napiLzma) {
+      bench(
+        '@napi-rs/lzma',
+        async () => {
+          await napiLzma!.compress(binaryData)
+        },
+        benchOptions,
+      )
+    }
+
+    if (lzmaNative) {
+      bench(
+        'lzma-native',
+        async () => {
+          await lzmaNative!.compress(binaryData)
+        },
+        benchOptions,
+      )
+    }
+  },
+)
 
 // ============================================================================
 // Compression Ratio Comparison
 // ============================================================================
 
-describe('LZMA Compression Ratio by Mode', () => {
-  bench(
-    'Calculate compression ratios',
-    () => {
-      const originalSize = Buffer.byteLength(largeText, 'utf-8')
+describe.skipIf(!shouldRunGroup('comparison:compression-ratio'))(
+  'LZMA Compression Ratio by Mode',
+  () => {
+    bench(
+      'Calculate compression ratios',
+      () => {
+        const originalSize = Buffer.byteLength(largeText, 'utf-8')
 
-      // lzma-web at different modes
-      const mode1 = compressSync(largeText, 1)
-      const mode5 = compressSync(largeText, 5)
-      const mode9 = compressSync(largeText, 9)
+        // lzma-web at different modes
+        const mode1 = compressSync(largeText, 1)
+        const mode5 = compressSync(largeText, 5)
+        const mode9 = compressSync(largeText, 9)
 
-      console.log(
-        `\nCompression Ratios for large-kjv.txt (${(originalSize / 1024).toFixed(0)} KB):`,
-      )
-      console.log(
-        `  Mode 1: ${((mode1.length / originalSize) * 100).toFixed(1)}% (${(mode1.length / 1024).toFixed(0)} KB)`,
-      )
-      console.log(
-        `  Mode 5: ${((mode5.length / originalSize) * 100).toFixed(1)}% (${(mode5.length / 1024).toFixed(0)} KB)`,
-      )
-      console.log(
-        `  Mode 9: ${((mode9.length / originalSize) * 100).toFixed(1)}% (${(mode9.length / 1024).toFixed(0)} KB)`,
-      )
-    },
-    { iterations: 1, time: 1000 },
-  )
-})
+        console.log(
+          `\nCompression Ratios for large-kjv.txt (${(originalSize / 1024).toFixed(0)} KB):`,
+        )
+        console.log(
+          `  Mode 1: ${((mode1.length / originalSize) * 100).toFixed(1)}% (${(mode1.length / 1024).toFixed(0)} KB)`,
+        )
+        console.log(
+          `  Mode 5: ${((mode5.length / originalSize) * 100).toFixed(1)}% (${(mode5.length / 1024).toFixed(0)} KB)`,
+        )
+        console.log(
+          `  Mode 9: ${((mode9.length / originalSize) * 100).toFixed(1)}% (${(mode9.length / 1024).toFixed(0)} KB)`,
+        )
+      },
+      { iterations: 1, time: 1000 },
+    )
+  },
+)

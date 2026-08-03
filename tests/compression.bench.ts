@@ -10,14 +10,19 @@ const __dirname = path.dirname(__filename)
 const pathToFiles = path.join(__dirname, 'files')
 const files = fs.readdirSync(pathToFiles)
 const compressionModes = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
+const benchmarkGroup = process.env.BENCHMARK_GROUP
+
+const shouldRunGroup = (group: string) =>
+  !benchmarkGroup || benchmarkGroup === group
 
 // Helper to run compression benchmark
 const benchCompress = (
+  group: string,
   name: string,
   content: string | Buffer,
   mode: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
 ) => {
-  bench(
+  bench.skipIf(!shouldRunGroup(group))(
     name,
     async () => {
       await new Promise((resolve) => {
@@ -29,8 +34,8 @@ const benchCompress = (
 }
 
 // Helper to run decompression benchmark
-const benchDecompress = (name: string, compressed: Buffer) => {
-  bench(
+const benchDecompress = (group: string, name: string, compressed: Buffer) => {
+  bench.skipIf(!shouldRunGroup(group))(
     name,
     async () => {
       await new Promise((resolve) => {
@@ -51,7 +56,7 @@ const decompressionFiles = files.filter(
 describe('Decompression Performance', () => {
   decompressionFiles.forEach((file) => {
     const compressed = fs.readFileSync(path.join(pathToFiles, file))
-    benchDecompress(`decompress ${file}`, compressed)
+    benchDecompress(`decompress:${file}`, `decompress ${file}`, compressed)
   })
 })
 
@@ -75,7 +80,12 @@ describe('Compression Performance - Various Modes', () => {
     describe(fileName, () => {
       // Exercise every public compression mode for each representative input.
       compressionModes.forEach((mode) => {
-        benchCompress(`compress ${fileName} (mode ${mode})`, data, mode)
+        benchCompress(
+          `compress:${fileName}`,
+          `compress ${fileName} (mode ${mode})`,
+          data,
+          mode,
+        )
       })
     })
   })
