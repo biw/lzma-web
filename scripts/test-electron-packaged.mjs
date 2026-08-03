@@ -21,8 +21,13 @@ const tempRoot = mkdtempSync(path.join(os.tmpdir(), 'lzma-web-electron-'))
 const packageDir = path.join(tempRoot, 'package')
 const appDir = path.join(tempRoot, 'app')
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx'
-const electronVersion = '35.7.5'
+const electronPackagerCmd = path.join(
+  appDir,
+  'node_modules',
+  '.bin',
+  process.platform === 'win32' ? 'electron-packager.cmd' : 'electron-packager',
+)
+const electronVersion = '43.2.0'
 
 function run(command, args, cwd, options = {}) {
   const result = spawnSync(command, args, {
@@ -102,15 +107,14 @@ try {
       '--no-save',
       tarballPath,
       `electron@${electronVersion}`,
-      '@electron/packager@18.3.6',
+      '@electron/packager@20.0.4',
     ],
     appDir,
   )
 
   run(
-    npxCmd,
+    electronPackagerCmd,
     [
-      'electron-packager',
       '.',
       'lzma-web-smoke',
       `--platform=${process.platform}`,
