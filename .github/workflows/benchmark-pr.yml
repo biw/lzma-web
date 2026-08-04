@@ -269,13 +269,9 @@ jobs:
         run: |
           if [ -f pr-results.json ] && [ -f main-results.json ]; then
             node scripts/compare-benchmarks.js || {
-              echo "## 📊 Benchmark Comparison" > benchmark-comparison.md
-              echo "" >> benchmark-comparison.md
               echo "⚠️ Benchmark comparison could not be generated." >> benchmark-comparison.md
             }
           else
-            echo "## 📊 Benchmark Comparison" > benchmark-comparison.md
-            echo "" >> benchmark-comparison.md
             if [ ! -f pr-results.json ]; then
               echo "⚠️ PR benchmarks did not produce results." >> benchmark-comparison.md
             fi
@@ -283,8 +279,12 @@ jobs:
               echo "⚠️ Main branch benchmarks did not produce results (this may be expected for new features)." >> benchmark-comparison.md
             fi
           fi
-          sed -i "1s|.*|## 📊 ${{ matrix.label }}|" benchmark-comparison.md
-          mv benchmark-comparison.md "${{ matrix.id }}-benchmark-comparison.md"
+          {
+            echo "### 📊 ${{ matrix.label }}"
+            echo
+            cat benchmark-comparison.md
+          } > formatted-benchmark-comparison.md
+          mv formatted-benchmark-comparison.md "${{ matrix.id }}-benchmark-comparison.md"
 
       - name: Upload comparison report
         uses: actions/upload-artifact@v4
@@ -316,6 +316,10 @@ jobs:
 
           if [ "${#reports[@]}" -gt 0 ]; then
             {
+              echo "## Benchmarks"
+              echo
+              echo "*Benchmarks run with Vitest. Lower mean time is better.*"
+              echo
               for report in "${reports[@]}"; do
                 cat "$report"
                 echo
@@ -324,7 +328,11 @@ jobs:
               done
             } > benchmark-comparison.md
           else
-            echo "⚠️ Benchmark comparison reports could not be generated." > benchmark-comparison.md
+            {
+              echo "## Benchmarks"
+              echo
+              echo "⚠️ Benchmark comparison reports could not be generated."
+            } > benchmark-comparison.md
           fi
 
       - name: Comment PR

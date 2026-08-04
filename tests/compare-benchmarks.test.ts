@@ -42,8 +42,16 @@ describe('compareResults', () => {
 
       const report = await readFile(reportFile, 'utf8')
       expect(report).toContain('Comparing **2** benchmarks')
-      expect(report).toContain('Small text compression | lzma-web (sync)')
-      expect(report).toContain('Large text compression | lzma-web (sync)')
+      expect(report).toContain('<details>')
+      expect(report).toContain('</details>')
+      expect(report).toContain('| Benchmark | Main (ms) | PR (ms) | Change |')
+      expect(report).not.toContain('| File | Suite |')
+      expect(report).toContain(
+        '| lzma-web (sync) | 1.00 | 2.00 | 🔴 +100.00% |',
+      )
+      expect(report).toContain(
+        '| lzma-web (sync) | 100.00 | 200.00 | 🔴 +100.00% |',
+      )
     } finally {
       await rm(directory, { recursive: true, force: true })
     }
