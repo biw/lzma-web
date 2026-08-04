@@ -49,6 +49,18 @@ export function parseBenchmarkResults(filePath) {
         for (const bench of group.benchmarks || []) {
           const benchmarkFile = file.filepath || '(unknown file)'
           const suiteName = group.fullName || group.name || '(unnamed suite)'
+
+          // Vitest includes entries for benchmarks that never collected a
+          // sample (for example, an optional native library that cannot run
+          // on the current Node version). Those entries have no usable mean
+          // and cannot be compared meaningfully.
+          if (!Number.isFinite(bench.mean) || bench.mean <= 0) {
+            console.warn(
+              `Skipping incomplete benchmark result: ${suiteName} > ${bench.name}`,
+            )
+            continue
+          }
+
           const id = benchmarkId(benchmarkFile, suiteName, bench.name)
 
           benchmarks.set(id, {

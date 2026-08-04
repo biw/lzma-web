@@ -21,6 +21,7 @@ describe('compareResults', () => {
               fullName: 'Small text compression',
               benchmarks: [
                 { name: 'lzma-web (sync)', hz: 1000, mean: smallMean },
+                { name: 'incomplete native benchmark', hz: 0 },
               ],
             },
             {
@@ -52,6 +53,7 @@ describe('compareResults', () => {
       expect(report).toContain(
         '| lzma-web (sync) | 100.00 | 200.00 | 🔴 +100.00% |',
       )
+      expect(report).not.toContain('incomplete native benchmark')
     } finally {
       await rm(directory, { recursive: true, force: true })
     }
