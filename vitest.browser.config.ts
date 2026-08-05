@@ -1,5 +1,10 @@
 import { defineConfig } from 'vitest/config'
 
+// GitHub-hosted Ubuntu runners already include Google Chrome.  Using it there
+// avoids a large, occasionally stalled Playwright browser download while
+// retaining Playwright-managed Chromium for local development.
+const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+
 export default defineConfig({
   optimizeDeps: {
     // Resolve this from the browser consumer fixture instead of pre-bundling
@@ -24,6 +29,13 @@ export default defineConfig({
       enabled: true,
       name: 'chromium',
       provider: 'playwright',
+      providerOptions: chromiumExecutablePath
+        ? {
+            launch: {
+              executablePath: chromiumExecutablePath,
+            },
+          }
+        : {},
       headless: true,
     },
     coverage: {
