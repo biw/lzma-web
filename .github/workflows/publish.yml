@@ -98,7 +98,9 @@ jobs:
         run: pnpm generate
 
       - name: Install Chromium for browser Worker tests
-        run: pnpm exec playwright install --with-deps chromium
+        # GitHub's Ubuntu runner already provides the required system libraries.
+        # Avoid --with-deps here: it invokes apt and can block on runner locks.
+        run: pnpm exec playwright install chromium
 
       - name: Run complete release gate
         run: pnpm test:release

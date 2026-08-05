@@ -128,7 +128,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        # GitHub's Ubuntu runner already provides the required system libraries.
+        # Avoid --with-deps here: it invokes apt and can block on runner locks.
+        run: pnpm exec playwright install chromium
 
       - name: Run browser Worker tests with coverage
         run: pnpm test:browser:coverage
