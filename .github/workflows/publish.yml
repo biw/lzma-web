@@ -37,9 +37,18 @@ jobs:
           echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "Current version in package.json: $CURRENT_VERSION"
 
-          # Get published version from npm (if it exists)
-          PUBLISHED_VERSION=$(npm view lzma-web version 2>/dev/null || echo "none")
-          echo "Published version on npm: $PUBLISHED_VERSION"
+          # Check the exact version, not just npm's latest dist-tag. A prerelease
+          # such as 4.0.0-rc.5 can already be published under the next dist-tag.
+          PUBLISHED_VERSION=$(npm view "lzma-web@$CURRENT_VERSION" version 2>/dev/null || true)
+
+          if [ -n "$PUBLISHED_VERSION" ]; then
+            echo "Exact version already published on npm: $PUBLISHED_VERSION"
+          else
+            # Ensure the registry is reachable before treating the exact version
+            # as unpublished. This command intentionally fails on a registry error.
+            LATEST_VERSION=$(npm view lzma-web version)
+            echo "Exact version is not published; current latest is $LATEST_VERSION"
+          fi
 
           # Check if this is a prerelease version (contains a hyphen, e.g. 4.0.0-rc.1)
           if [[ "$CURRENT_VERSION" == *-* ]]; then
@@ -49,17 +58,13 @@ jobs:
             echo "prerelease=false" >> $GITHUB_OUTPUT
           fi
 
-          # Compare versions
-          if [ "$PUBLISHED_VERSION" = "none" ]; then
-            echo "Package not yet published to npm"
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "should_publish=true" >> $GITHUB_OUTPUT
-          elif [ "$CURRENT_VERSION" = "$PUBLISHED_VERSION" ]; then
+          # Publish only versions that are not already immutable on npm.
+          if [ "$CURRENT_VERSION" = "$PUBLISHED_VERSION" ]; then
             echo "Version $CURRENT_VERSION is already published"
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "should_publish=false" >> $GITHUB_OUTPUT
           else
-            echo "Version changed from $PUBLISHED_VERSION to $CURRENT_VERSION"
+            echo "Version $CURRENT_VERSION has not been published"
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "should_publish=true" >> $GITHUB_OUTPUT
           fi
@@ -92,14 +97,11 @@ jobs:
       - name: Generate modules
         run: pnpm generate
 
-      - name: Lint
-        run: pnpm lint
+      - name: Install Chromium for browser Worker tests
+        run: pnpm exec playwright install --with-deps chromium
 
-      - name: Test
-        run: pnpm test
-
-      - name: Build
-        run: pnpm build
+      - name: Run complete release gate
+        run: pnpm test:release
 
       - name: Ensure recent npm for trusted publishing
         run: npm install -g npm@latest

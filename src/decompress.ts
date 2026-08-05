@@ -6,10 +6,10 @@
  *
  * @example
  * ```ts
- * import { decompress, decompressSync } from 'lzma-web/decompress'
+ * import { decompressAsync, decompressSync } from 'lzma-web/decompress'
  *
  * // Async decompression
- * const decompressed = await decompress(compressedData)
+ * const decompressed = await decompressAsync(compressedData)
  *
  * // Sync decompression
  * const decompressedSync = decompressSync(compressedData)

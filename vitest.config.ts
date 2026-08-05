@@ -33,6 +33,12 @@ export default defineConfig({
         'src/generated/**',
         'src/worker-thread.ts', // Worker entry point
       ],
+      thresholds: {
+        statements: 93,
+        branches: 91,
+        functions: 92,
+        lines: 93,
+      },
     },
   },
 })

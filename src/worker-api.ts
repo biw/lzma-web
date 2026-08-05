@@ -55,6 +55,25 @@ export function createWorkerLZMA(): WorkerLZMA {
   let callbackId = 0
   const pendingCallbacks: Map<number, PendingCallback> = new Map()
 
+  function rejectPendingCallbacks(error: Error): void {
+    for (const pending of pendingCallbacks.values()) {
+      pending.reject(error)
+    }
+    pendingCallbacks.clear()
+  }
+
+  function disposeWorker(): void {
+    const activeWorker = worker
+    worker = null
+
+    activeWorker?.terminate()
+
+    if (workerUrl) {
+      URL.revokeObjectURL(workerUrl)
+      workerUrl = null
+    }
+  }
+
   function getWorker(): Worker {
     if (worker) return worker
 
@@ -66,12 +85,22 @@ export function createWorkerLZMA(): WorkerLZMA {
       )
     }
 
-    workerUrl = URL.createObjectURL(
+    const nextWorkerUrl = URL.createObjectURL(
       new Blob([workerThreadSource], { type: 'text/javascript' }),
     )
-    worker = new Worker(workerUrl, { type: 'module' })
 
-    worker.onmessage = (e: MessageEvent<WorkerMessage>) => {
+    let nextWorker: Worker
+    try {
+      nextWorker = new Worker(nextWorkerUrl, { type: 'module' })
+    } catch (error) {
+      URL.revokeObjectURL(nextWorkerUrl)
+      throw error
+    }
+
+    workerUrl = nextWorkerUrl
+    worker = nextWorker
+
+    nextWorker.onmessage = (e: MessageEvent<WorkerMessage>) => {
       const { action, cbn, result, error } = e.data
       const pending = pendingCallbacks.get(cbn)
 
@@ -102,21 +131,24 @@ export function createWorkerLZMA(): WorkerLZMA {
       }
     }
 
-    worker.onerror = (event: ErrorEvent) => {
+    nextWorker.onerror = (event: ErrorEvent) => {
+      // A stale event from a worker that has already been replaced must not
+      // affect the current worker instance.
+      if (worker !== nextWorker) return
+
       const err = new Error(
         `Worker error: ${event.message} (${event.filename}:${event.lineno})`,
       )
 
-      // Reject all pending operations
-      for (const [cbn, pending] of pendingCallbacks) {
-        pending.reject(err)
-        pendingCallbacks.delete(cbn)
-      }
+      // A worker error is terminal for that instance. Reject every operation,
+      // dispose it, and allow the next request to create a fresh worker.
+      rejectPendingCallbacks(err)
+      disposeWorker()
 
       console.error('Uncaught error in LZMA worker', err)
     }
 
-    return worker
+    return nextWorker
   }
 
   return {
@@ -174,20 +206,8 @@ export function createWorkerLZMA(): WorkerLZMA {
     },
 
     terminate(): void {
-      if (worker) {
-        // Reject any pending operations
-        for (const [cbn, pending] of pendingCallbacks) {
-          pending.reject(new Error('Worker terminated'))
-          pendingCallbacks.delete(cbn)
-        }
-
-        worker.terminate()
-        worker = null
-        if (workerUrl) {
-          URL.revokeObjectURL(workerUrl)
-          workerUrl = null
-        }
-      }
+      rejectPendingCallbacks(new Error('Worker terminated'))
+      disposeWorker()
     },
 
     get worker(): Worker | null {
