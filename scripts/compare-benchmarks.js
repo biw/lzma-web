@@ -169,9 +169,15 @@ export function compareResults({
 
     markdown += '\n'
     markdown += `- **Average scenario time change**: ${formatChange(avgMeanChange)}\n`
-    markdown += `- **Faster** (>1%): ${improvements}\n`
-    markdown += `- **Slower** (>1%): ${regressions}\n`
-    markdown += `- **Unchanged** (±1%): ${neutral}\n`
+    if (improvements > 0) {
+      markdown += `- **Faster** (>1%): ${improvements}\n`
+    }
+    if (regressions > 0) {
+      markdown += `- **Slower** (>1%): ${regressions}\n`
+    }
+    if (neutral > 0) {
+      markdown += `- **Unchanged** (±1%): ${neutral}\n`
+    }
 
     if (regressions > 0) {
       markdown +=

@@ -54,6 +54,9 @@ describe('compareResults', () => {
         '| lzma-web (sync) | 100.00 | 200.00 | 🔴 +100.00% |',
       )
       expect(report).not.toContain('incomplete native benchmark')
+      expect(report).toContain('- **Slower** (>1%): 2')
+      expect(report).not.toContain('**Faster**')
+      expect(report).not.toContain('**Unchanged**')
     } finally {
       await rm(directory, { recursive: true, force: true })
     }
