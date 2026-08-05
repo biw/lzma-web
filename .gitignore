@@ -15,6 +15,7 @@ bench-results.json
 main-results.json
 pr-results.json
 benchmark-comparison.md
+compression-ratio-result.json
 
 # pnpm
 .pnpm-store/

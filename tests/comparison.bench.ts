@@ -54,9 +54,40 @@ const LZMA_MODE = 1
 // Benchmark options
 const benchOptions = { time: 3000, iterations: 5 }
 const benchmarkGroup = process.env.BENCHMARK_GROUP
+const compressionRatioModes = [1, 5, 9] as const
+const compressionRatioOutput = process.env.COMPRESSION_RATIO_OUTPUT
+let compressionRatioWritten = false
 
 const shouldRunGroup = (group: string) =>
   !benchmarkGroup || benchmarkGroup === group
+
+const shouldRunCompressionRatioMode = (mode: number) =>
+  !benchmarkGroup ||
+  benchmarkGroup === 'comparison:compression-ratio' ||
+  benchmarkGroup === `comparison:compression-ratio:mode:${mode}`
+
+const writeCompressionRatio = (mode: number, compressed: Uint8Array) => {
+  if (!compressionRatioOutput || compressionRatioWritten) return
+
+  const originalBytes = Buffer.byteLength(largeText, 'utf-8')
+  const compressedBytes = compressed.length
+
+  fs.writeFileSync(
+    compressionRatioOutput,
+    `${JSON.stringify(
+      {
+        input: 'large-kjv.txt',
+        mode,
+        originalBytes,
+        compressedBytes,
+        ratioPercent: (compressedBytes / originalBytes) * 100,
+      },
+      null,
+      2,
+    )}\n`,
+  )
+  compressionRatioWritten = true
+}
 
 // Check if Workers are available (browser environment)
 const hasWorkers = typeof Worker !== 'undefined'
@@ -614,33 +645,15 @@ describe.skipIf(!shouldRunGroup('comparison:libraries-binary-compression'))(
 // Compression Ratio Comparison
 // ============================================================================
 
-describe.skipIf(!shouldRunGroup('comparison:compression-ratio'))(
-  'LZMA Compression Ratio by Mode',
-  () => {
-    bench(
-      'Calculate compression ratios',
+describe('LZMA Compression Ratio by Mode', () => {
+  compressionRatioModes.forEach((mode) => {
+    bench.skipIf(!shouldRunCompressionRatioMode(mode))(
+      `Calculate compression ratio (mode ${mode})`,
       () => {
-        const originalSize = Buffer.byteLength(largeText, 'utf-8')
-
-        // lzma-web at different modes
-        const mode1 = compressSync(largeText, 1)
-        const mode5 = compressSync(largeText, 5)
-        const mode9 = compressSync(largeText, 9)
-
-        console.log(
-          `\nCompression Ratios for large-kjv.txt (${(originalSize / 1024).toFixed(0)} KB):`,
-        )
-        console.log(
-          `  Mode 1: ${((mode1.length / originalSize) * 100).toFixed(1)}% (${(mode1.length / 1024).toFixed(0)} KB)`,
-        )
-        console.log(
-          `  Mode 5: ${((mode5.length / originalSize) * 100).toFixed(1)}% (${(mode5.length / 1024).toFixed(0)} KB)`,
-        )
-        console.log(
-          `  Mode 9: ${((mode9.length / originalSize) * 100).toFixed(1)}% (${(mode9.length / 1024).toFixed(0)} KB)`,
-        )
+        const compressed = compressSync(largeText, mode)
+        writeCompressionRatio(mode, compressed)
       },
       { iterations: 1, time: 1000 },
     )
-  },
-)
+  })
+})
