@@ -152,7 +152,7 @@ describe('mergeSplitBenchmarkReports', () => {
         '| 5 | 0.5 KiB | 0.5 KiB | 5.0000% | 5.5000% | +0.5000 pp |',
       )
       expect(ratioReport).toContain(
-        '*Compression-ratio change is measured in percentage points; lower is better.*',
+        '*Ratios are deterministic and each mode is compressed once per revision. Compression-ratio change is measured in percentage points; lower is better.*',
       )
     } finally {
       await rm(directory, { recursive: true, force: true })

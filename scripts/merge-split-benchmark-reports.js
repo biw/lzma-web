@@ -194,7 +194,7 @@ function createRatioBody({ pairs, dataDirectory }) {
   }
 
   body +=
-    '\n*Compression-ratio change is measured in percentage points; lower is better.*\n'
+    '\n*Ratios are deterministic and each mode is compressed once per revision. Compression-ratio change is measured in percentage points; lower is better.*\n'
   return body
 }
 

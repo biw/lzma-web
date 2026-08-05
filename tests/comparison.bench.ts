@@ -56,6 +56,15 @@ const benchOptions = { time: 3000, iterations: 5 }
 const benchmarkGroup = process.env.BENCHMARK_GROUP
 const compressionRatioModes = [1, 5, 9] as const
 const compressionRatioOutput = process.env.COMPRESSION_RATIO_OUTPUT
+// Ratios are deterministic, while compression performance is measured by the
+// dedicated execution-mode benchmarks. Avoid Tinybench's default warm-up work
+// here so each ratio mode is compressed exactly once per revision.
+const compressionRatioBenchOptions = {
+  iterations: 1,
+  time: 0,
+  warmupIterations: 0,
+  warmupTime: 0,
+}
 let compressionRatioWritten = false
 
 const shouldRunGroup = (group: string) =>
@@ -653,7 +662,7 @@ describe('LZMA Compression Ratio by Mode', () => {
         const compressed = compressSync(largeText, mode)
         writeCompressionRatio(mode, compressed)
       },
-      { iterations: 1, time: 1000 },
+      compressionRatioBenchOptions,
     )
   })
 })
