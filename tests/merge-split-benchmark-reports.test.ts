@@ -148,6 +148,11 @@ describe('mergeSplitBenchmarkReports', () => {
       expect(ratioReport).toContain(
         'Comparing **3** compression-ratio benchmarks',
       )
+      expect(ratioReport).toContain('<details>')
+      expect(ratioReport).toContain(
+        '<summary><strong>Compression-ratio changes</strong></summary>',
+      )
+      expect(ratioReport).toContain('</details>')
       expect(ratioReport).toContain(
         '| 5 | 0.5 KiB | 0.5 KiB | 5.0000% | 5.5000% | +0.5000 pp |',
       )

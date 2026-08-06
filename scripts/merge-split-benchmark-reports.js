@@ -185,6 +185,8 @@ function createRatioBody({ pairs, dataDirectory }) {
 
   let body = `Comparing **${ratioRows.length}** compression-ratio benchmarks between \`main\` and this PR.\n\n`
   body +=
+    '<details>\n<summary><strong>Compression-ratio changes</strong></summary>\n\n'
+  body +=
     '| Mode | Main compressed size | PR compressed size | Main ratio | PR ratio | Ratio change | Main time (ms) | PR time (ms) | Time change |\n'
   body +=
     '|------|----------------------|--------------------|------------|----------|--------------|----------------|--------------|-------------|\n'
@@ -194,7 +196,7 @@ function createRatioBody({ pairs, dataDirectory }) {
   }
 
   body +=
-    '\n*Ratios are deterministic and each mode is compressed once per revision. Compression-ratio change is measured in percentage points; lower is better.*\n'
+    '\n</details>\n\n*Ratios are deterministic and each mode is compressed once per revision. Compression-ratio change is measured in percentage points; lower is better.*\n'
   return body
 }
 
