@@ -95,6 +95,265 @@ describe('Worker API', () => {
         }),
       )
     })
+
+    test('recreates the Worker after an uncaught Worker error', async () => {
+      class RecoveringWorkerMock {
+        static instances: RecoveringWorkerMock[] = []
+        onmessage: Worker['onmessage'] = null
+        onerror: Worker['onerror'] = null
+        terminated = false
+
+        constructor(_url: URL | string, _options?: unknown) {
+          RecoveringWorkerMock.instances.push(this)
+        }
+
+        postMessage(message: { action: number; cbn: number }): void {
+          if (RecoveringWorkerMock.instances[0] === this) {
+            queueMicrotask(() => {
+              this.onerror?.({
+                message: 'mock worker crash',
+                filename: 'mock-worker.js',
+                lineno: 1,
+              } as ErrorEvent)
+            })
+            return
+          }
+
+          queueMicrotask(() => {
+            const handler = this.onmessage as
+              | ((event: MessageEvent) => void)
+              | null
+            handler?.({
+              data: {
+                action: message.action,
+                cbn: message.cbn,
+                result: new Uint8Array([1]),
+              },
+            } as MessageEvent)
+          })
+        }
+
+        addEventListener(): void {}
+
+        removeEventListener(): void {}
+
+        terminate(): void {
+          this.terminated = true
+        }
+      }
+
+      vi.stubGlobal('Worker', RecoveringWorkerMock as unknown as typeof Worker)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const lzma = createWorkerLZMA()
+
+      await expect(lzma.compress('first request', 1)).rejects.toThrow(
+        /Worker error: mock worker crash/,
+      )
+      expect(lzma.worker).toBeNull()
+      expect(RecoveringWorkerMock.instances[0].terminated).toBe(true)
+
+      await expect(lzma.compress('recovered request', 1)).resolves.toEqual(
+        new Uint8Array([1]),
+      )
+      expect(RecoveringWorkerMock.instances).toHaveLength(2)
+      expect(lzma.worker).toBe(
+        RecoveringWorkerMock.instances[1] as unknown as Worker,
+      )
+    })
+
+    test('cleans up the Blob URL when Worker construction fails', async () => {
+      class ConstructionFailingWorkerMock {
+        constructor(_url: URL | string, _options?: unknown) {
+          throw new Error('mock Worker construction failure')
+        }
+      }
+
+      vi.stubGlobal(
+        'Worker',
+        ConstructionFailingWorkerMock as unknown as typeof Worker,
+      )
+      const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL')
+      const lzma = createWorkerLZMA()
+
+      await expect(lzma.compress('test', 1)).rejects.toThrow(
+        'mock Worker construction failure',
+      )
+      expect(lzma.worker).toBeNull()
+      expect(revokeObjectURL).toHaveBeenCalledTimes(1)
+    })
+
+    test('ignores errors emitted by an already-replaced Worker', async () => {
+      class WorkerMock {
+        static instances: WorkerMock[] = []
+        onmessage: Worker['onmessage'] = null
+        onerror: Worker['onerror'] = null
+
+        constructor(_url: URL | string, _options?: unknown) {
+          WorkerMock.instances.push(this)
+        }
+
+        postMessage(_message: unknown): void {}
+
+        addEventListener(): void {}
+
+        removeEventListener(): void {}
+
+        terminate(): void {}
+      }
+
+      vi.stubGlobal('Worker', WorkerMock as unknown as typeof Worker)
+      const lzma = createWorkerLZMA()
+      const firstOperation = lzma.compress('first request', 1)
+      const firstWorker = WorkerMock.instances[0]
+
+      lzma.terminate()
+      await expect(firstOperation).rejects.toThrow('Worker terminated')
+
+      const secondOperation = lzma.compress('second request', 1)
+      const secondWorker = WorkerMock.instances[1]
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      firstWorker.onerror?.({
+        message: 'stale worker crash',
+        filename: 'mock-worker.js',
+        lineno: 1,
+      } as ErrorEvent)
+
+      expect(lzma.worker).toBe(secondWorker as unknown as Worker)
+      expect(errorSpy).not.toHaveBeenCalled()
+
+      lzma.terminate()
+      await expect(secondOperation).rejects.toThrow('Worker terminated')
+    })
+
+    test('ignores a message with no pending operation', async () => {
+      class WorkerMock {
+        static instance: WorkerMock
+        onmessage: Worker['onmessage'] = null
+        onerror: Worker['onerror'] = null
+
+        constructor(_url: URL | string, _options?: unknown) {
+          WorkerMock.instance = this
+        }
+
+        postMessage(message: { action: number; cbn: number }): void {
+          const handler = this.onmessage as ((event: MessageEvent) => void) | null
+          handler?.({
+            data: {
+              action: message.action,
+              cbn: message.cbn,
+              result: new Uint8Array([1]),
+            },
+          } as MessageEvent)
+        }
+
+        addEventListener(): void {}
+
+        removeEventListener(): void {}
+
+        terminate(): void {}
+      }
+
+      vi.stubGlobal('Worker', WorkerMock as unknown as typeof Worker)
+      const lzma = createWorkerLZMA()
+      await lzma.compress('test', 1)
+
+      expect(() => {
+        const handler = WorkerMock.instance.onmessage as
+          | ((event: MessageEvent) => void)
+          | null
+        handler?.({
+          data: { action: 1, cbn: 0, result: new Uint8Array([1]) },
+        } as MessageEvent)
+      }).not.toThrow()
+    })
+
+    test('rejects worker errors and invalid completion messages', async () => {
+      class WorkerMock {
+        onmessage: Worker['onmessage'] = null
+        onerror: Worker['onerror'] = null
+
+        constructor(_url: URL | string, _options?: unknown) {}
+
+        postMessage(message: { action: number; cbn: number }): void {
+          const handler = this.onmessage as ((event: MessageEvent) => void) | null
+          handler?.({
+            data:
+              message.action === 1
+                ? { action: 1, cbn: message.cbn, error: 'worker failed' }
+                : { action: 2, cbn: message.cbn, result: 0 },
+          } as MessageEvent)
+        }
+
+        addEventListener(): void {}
+
+        removeEventListener(): void {}
+
+        terminate(): void {}
+      }
+
+      vi.stubGlobal('Worker', WorkerMock as unknown as typeof Worker)
+      const lzma = createWorkerLZMA()
+
+      await expect(lzma.compress('test', 1)).rejects.toThrow('worker failed')
+      await expect(lzma.decompress(new Uint8Array([1]))).rejects.toThrow(
+        'Operation failed: no result returned',
+      )
+    })
+
+    test('normalizes postMessage failures', async () => {
+      class ThrowingWorkerMock {
+        onmessage: Worker['onmessage'] = null
+        onerror: Worker['onerror'] = null
+
+        constructor(_url: URL | string, _options?: unknown) {}
+
+        postMessage(message: { action: number }): void {
+          if (message.action === 1) throw 'compression post failed'
+          throw new Error('decompression post failed')
+        }
+
+        addEventListener(): void {}
+
+        removeEventListener(): void {}
+
+        terminate(): void {}
+      }
+
+      vi.stubGlobal('Worker', ThrowingWorkerMock as unknown as typeof Worker)
+      const lzma = createWorkerLZMA()
+
+      await expect(lzma.compress('test', 1)).rejects.toThrow(
+        'compression post failed',
+      )
+      await expect(lzma.decompress(new Uint8Array([1]))).rejects.toThrow(
+        'decompression post failed',
+      )
+    })
+
+    test('rejects pending work when terminated', async () => {
+      class PendingWorkerMock {
+        onmessage: Worker['onmessage'] = null
+        onerror: Worker['onerror'] = null
+
+        constructor(_url: URL | string, _options?: unknown) {}
+
+        postMessage(_message: unknown): void {}
+
+        addEventListener(): void {}
+
+        removeEventListener(): void {}
+
+        terminate(): void {}
+      }
+
+      vi.stubGlobal('Worker', PendingWorkerMock as unknown as typeof Worker)
+      const lzma = createWorkerLZMA()
+      const operation = lzma.compress('test', 1)
+      lzma.terminate()
+
+      await expect(operation).rejects.toThrow('Worker terminated')
+    })
   })
 
   describe.skipIf(!hasWorker)('with real Workers', () => {

@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BENCHMARK_GROUP: ${{ matrix.benchmark_group }}
+      COMPRESSION_RATIO_OUTPUT: compression-ratio-result.json
     strategy:
       fail-fast: false
       max-parallel: 30
@@ -95,10 +96,42 @@ jobs:
             label: Compress binary data at every mode
             file: tests/compression.bench.ts
             benchmark_group: 'compress:binary'
-          - id: compress-timeseries
-            label: Compress time-series text at every mode
+          - id: compress-timeseries-mode-1
+            label: Compress time-series text (mode 1)
             file: tests/compression.bench.ts
-            benchmark_group: 'compress:timeseries.txt'
+            benchmark_group: 'compress:timeseries.txt:mode:1'
+          - id: compress-timeseries-mode-2
+            label: Compress time-series text (mode 2)
+            file: tests/compression.bench.ts
+            benchmark_group: 'compress:timeseries.txt:mode:2'
+          - id: compress-timeseries-mode-3
+            label: Compress time-series text (mode 3)
+            file: tests/compression.bench.ts
+            benchmark_group: 'compress:timeseries.txt:mode:3'
+          - id: compress-timeseries-mode-4
+            label: Compress time-series text (mode 4)
+            file: tests/compression.bench.ts
+            benchmark_group: 'compress:timeseries.txt:mode:4'
+          - id: compress-timeseries-mode-5
+            label: Compress time-series text (mode 5)
+            file: tests/compression.bench.ts
+            benchmark_group: 'compress:timeseries.txt:mode:5'
+          - id: compress-timeseries-mode-6
+            label: Compress time-series text (mode 6)
+            file: tests/compression.bench.ts
+            benchmark_group: 'compress:timeseries.txt:mode:6'
+          - id: compress-timeseries-mode-7
+            label: Compress time-series text (mode 7)
+            file: tests/compression.bench.ts
+            benchmark_group: 'compress:timeseries.txt:mode:7'
+          - id: compress-timeseries-mode-8
+            label: Compress time-series text (mode 8)
+            file: tests/compression.bench.ts
+            benchmark_group: 'compress:timeseries.txt:mode:8'
+          - id: compress-timeseries-mode-9
+            label: Compress time-series text (mode 9)
+            file: tests/compression.bench.ts
+            benchmark_group: 'compress:timeseries.txt:mode:9'
           - id: execution-small-compression
             label: Execution modes for small-text compression
             file: tests/comparison.bench.ts
@@ -135,10 +168,18 @@ jobs:
             label: Libraries for binary compression
             file: tests/comparison.bench.ts
             benchmark_group: 'comparison:libraries-binary-compression'
-          - id: compression-ratio
-            label: Compression-ratio report
+          - id: compression-ratio-mode-1
+            label: Compression ratio (mode 1)
             file: tests/comparison.bench.ts
-            benchmark_group: 'comparison:compression-ratio'
+            benchmark_group: 'comparison:compression-ratio:mode:1'
+          - id: compression-ratio-mode-5
+            label: Compression ratio (mode 5)
+            file: tests/comparison.bench.ts
+            benchmark_group: 'comparison:compression-ratio:mode:5'
+          - id: compression-ratio-mode-9
+            label: Compression ratio (mode 9)
+            file: tests/comparison.bench.ts
+            benchmark_group: 'comparison:compression-ratio:mode:9'
 
     steps:
       - name: Checkout PR
@@ -166,12 +207,17 @@ jobs:
         run: pnpm generate
 
       - name: Run benchmarks on PR branch
-        run: pnpm test:bench "${{ matrix.file }}" || true
+        run: |
+          rm -f bench-results.json compression-ratio-result.json
+          pnpm test:bench "${{ matrix.file }}" || true
 
       - name: Save PR benchmark results
         run: |
           if [ -f bench-results.json ]; then
             cp bench-results.json /tmp/pr-results.json
+          fi
+          if [ -f compression-ratio-result.json ]; then
+            cp compression-ratio-result.json /tmp/pr-compression-ratio.json
           fi
 
       - name: Save selected benchmark harness
@@ -233,21 +279,30 @@ jobs:
         run: cp /tmp/selected-benchmark.bench.ts "${{ matrix.file }}"
 
       - name: Run benchmarks on main branch with pnpm
-        run: pnpm test:bench "${{ matrix.file }}" || true
+        run: |
+          rm -f bench-results.json compression-ratio-result.json
+          pnpm test:bench "${{ matrix.file }}" || true
         if: env.MAIN_PACKAGE_MANAGER == 'pnpm'
 
       - name: Run benchmarks on main branch with Yarn
         if: env.MAIN_PACKAGE_MANAGER == 'yarn'
-        run: corepack yarn test:bench "${{ matrix.file }}" || true
+        run: |
+          rm -f bench-results.json compression-ratio-result.json
+          corepack yarn test:bench "${{ matrix.file }}" || true
 
       - name: Run benchmarks on main branch with npm
         if: env.MAIN_PACKAGE_MANAGER == 'npm'
-        run: npm run test:bench -- "${{ matrix.file }}" || true
+        run: |
+          rm -f bench-results.json compression-ratio-result.json
+          npm run test:bench -- "${{ matrix.file }}" || true
 
       - name: Save main benchmark results
         run: |
           if [ -f bench-results.json ]; then
             cp bench-results.json /tmp/main-results.json
+          fi
+          if [ -f compression-ratio-result.json ]; then
+            cp compression-ratio-result.json /tmp/main-compression-ratio.json
           fi
 
       - name: Checkout PR branch again
@@ -263,6 +318,18 @@ jobs:
           fi
           if [ -f /tmp/main-results.json ]; then
             cp /tmp/main-results.json main-results.json
+          fi
+          if [ -f /tmp/pr-results.json ]; then
+            cp /tmp/pr-results.json "${{ matrix.id }}-pr-results.json"
+          fi
+          if [ -f /tmp/main-results.json ]; then
+            cp /tmp/main-results.json "${{ matrix.id }}-main-results.json"
+          fi
+          if [ -f /tmp/pr-compression-ratio.json ]; then
+            cp /tmp/pr-compression-ratio.json "${{ matrix.id }}-pr-compression-ratio.json"
+          fi
+          if [ -f /tmp/main-compression-ratio.json ]; then
+            cp /tmp/main-compression-ratio.json "${{ matrix.id }}-main-compression-ratio.json"
           fi
 
       - name: Generate comparison report
@@ -288,10 +355,23 @@ jobs:
 
       - name: Upload comparison report
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && !startsWith(matrix.id, 'compress-timeseries-mode-') && !startsWith(matrix.id, 'compression-ratio-mode-')
         with:
           name: benchmark-report-${{ matrix.id }}
           path: ${{ matrix.id }}-benchmark-comparison.md
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload split benchmark data
+        uses: actions/upload-artifact@v4
+        if: always() && (startsWith(matrix.id, 'compress-timeseries-mode-') || startsWith(matrix.id, 'compression-ratio-mode-'))
+        with:
+          name: benchmark-data-${{ matrix.id }}
+          path: |
+            ${{ matrix.id }}-pr-results.json
+            ${{ matrix.id }}-main-results.json
+            ${{ matrix.id }}-pr-compression-ratio.json
+            ${{ matrix.id }}-main-compression-ratio.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -301,6 +381,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download comparison reports
         uses: actions/download-artifact@v4
         continue-on-error: true
@@ -308,6 +391,17 @@ jobs:
           pattern: benchmark-report-*
           path: benchmark-reports
           merge-multiple: true
+
+      - name: Download split benchmark data
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: benchmark-data-*
+          path: benchmark-data
+          merge-multiple: true
+
+      - name: Merge split benchmark reports
+        run: node scripts/merge-split-benchmark-reports.js benchmark-data benchmark-reports
 
       - name: Combine comparison reports
         run: |

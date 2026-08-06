@@ -13,7 +13,12 @@ const compressionModes = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const benchmarkGroup = process.env.BENCHMARK_GROUP
 
 const shouldRunGroup = (group: string) =>
-  !benchmarkGroup || benchmarkGroup === group
+  !benchmarkGroup ||
+  benchmarkGroup === group ||
+  benchmarkGroup === group.replace(/:mode:\d+$/, '')
+
+const compressionModeGroup = (fileName: string, mode: number) =>
+  `compress:${fileName}:mode:${mode}`
 
 // Helper to run compression benchmark
 const benchCompress = (
@@ -81,7 +86,7 @@ describe('Compression Performance - Various Modes', () => {
       // Exercise every public compression mode for each representative input.
       compressionModes.forEach((mode) => {
         benchCompress(
-          `compress:${fileName}`,
+          compressionModeGroup(fileName, mode),
           `compress ${fileName} (mode ${mode})`,
           data,
           mode,

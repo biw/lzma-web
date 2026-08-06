@@ -12,6 +12,7 @@ import {
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import * as esbuild from 'esbuild'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -111,6 +112,18 @@ try {
     ],
     appDir,
   )
+
+  // Bundle a real renderer consumer after installing the packed tarball. This
+  // resolves lzma-web/worker exactly as an Electron renderer bundler would.
+  await esbuild.build({
+    entryPoints: [path.join(appDir, 'renderer-entry.mjs')],
+    bundle: true,
+    format: 'esm',
+    platform: 'browser',
+    target: 'es2020',
+    outfile: path.join(appDir, 'renderer.js'),
+    logLevel: 'silent',
+  })
 
   run(
     electronPackagerCmd,

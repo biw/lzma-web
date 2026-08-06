@@ -2,8 +2,7 @@
 
 [![CI][ci-badge]][ci]
 [![version][version-badge]][package]
-[![bundlephobia][bundlephobia-badge]][bundlephobia]
-[![MIT License][license-badge]][license]
+[![npm-downloads][npm-downloads-badge]][package]
 
 The fastest isomorphic LZMA compression library for JavaScript. Works in browsers, Electron, and Node.js with a tree-shakeable, Promise-based API and optional Web Worker support.
 
@@ -12,7 +11,7 @@ The fastest isomorphic LZMA compression library for JavaScript. Works in browser
 - **Multiple APIs** - Promise-based, synchronous, and Web Worker APIs
 - **Tree-shakeable** - Import only compression or decompression to reduce bundle size
 - **TypeScript** - Full type definitions included
-- **Web Workers** - Automatic off-main-thread compression in browsers
+- **Web Workers** - Optional, explicit off-main-thread compression in browsers
 - **Universal** - Works in browsers, Electron, and Node.js
 - **Electron-tested** - CI includes a packaged Electron smoke test with `asar`
 - **Compatible** - Output compatible with the reference LZMA implementation
@@ -30,6 +29,12 @@ yarn add lzma-web
 pnpm add lzma-web
 ```
 
+### Runtime Support
+
+For Node.js usage, lzma-web supports Node.js 18 and later. Release CI runs on
+Node.js 26; use the included `.nvmrc` for local development. The
+`lzma-web/worker` entry point additionally requires browser `Worker` support.
+
 ## Quick Start
 
 ```javascript
@@ -43,6 +48,29 @@ const decompressed = await decompress(compressed)
 
 console.log(decompressed) // 'Hello, World!'
 ```
+
+## Migrating from v3
+
+Version 4 replaces the default `LZMA` class with named functions. It also no
+longer creates a Web Worker automatically.
+
+```javascript
+// v3
+import LZMA from 'lzma-web'
+
+const lzma = new LZMA()
+const compressedV3 = await lzma.compress('Hello, World!', 9)
+
+// v4
+import { compress } from 'lzma-web'
+
+const compressedV4 = await compress('Hello, World!', 9)
+```
+
+To keep compression off the browser's main thread, use the explicit
+`lzma-web/worker` entry point and call `terminate()` when finished. The v3
+`.cb` callback API and internal `dist/*` imports are not supported in v4;
+use Promise APIs and the documented entry points below instead.
 
 ## API Reference
 
@@ -60,7 +88,9 @@ console.log(decompressed) // 'Hello, World!'
 
 ### Main API (`lzma-web`)
 
-The default entry point provides Promise-based compression and decompression.
+The default entry point provides Promise-based compression and decompression
+on the current thread. It does not create a Web Worker; use
+`lzma-web/worker` when keeping browser UI work off the main thread matters.
 
 ```javascript
 import { compress, decompress } from 'lzma-web'
@@ -141,25 +171,30 @@ const decompressed = decompressSync(compressed)
 
 ### Web Worker API (`lzma-web/worker`)
 
-Explicitly manage Web Worker lifecycle for browser applications.
+Use this browser-focused entry point to run compression and decompression in a
+Web Worker. It is created lazily on the first operation and must be terminated
+when no longer needed.
 
 ```javascript
 import { createWorkerLZMA } from 'lzma-web/worker'
 
-// Create a worker instance
+// Create a worker handle (the Worker is created on the first operation)
 const lzma = createWorkerLZMA()
 
-// Compress (runs in Web Worker)
-const compressed = await lzma.compress('Hello, World!', 9)
-
-// Decompress (runs in Web Worker)
-const decompressed = await lzma.decompress(compressed)
-
-// Clean up when done (important!)
-lzma.terminate()
+try {
+  // Both operations run in the Web Worker
+  const compressed = await lzma.compress('Hello, World!', 9)
+  const decompressed = await lzma.decompress(compressed)
+} finally {
+  // Clean up when done
+  lzma.terminate()
+}
 ```
 
-> **Note:** The Worker is created lazily on first operation. Call `terminate()` to clean up resources when you're done.
+> **Note:** This entry point rejects operations when Web Workers are
+> unavailable. Use `lzma-web` or `lzma-web/sync` in environments without
+> Worker support. The Worker is backed by a `blob:` URL, so sites with a
+> Content Security Policy must allow `blob:` worker sources.
 
 ---
 
@@ -170,10 +205,7 @@ For bundle size optimization, import only what you need.
 #### Compression Only (`lzma-web/compress`)
 
 ```javascript
-import { compress, compressSync, compressAsync } from 'lzma-web/compress'
-
-// Async compression (callback internally handled)
-const compressed = await compress('Hello, World!', 5)
+import { compressSync, compressAsync } from 'lzma-web/compress'
 
 // Sync compression (blocking)
 const compressedSync = compressSync('Hello, World!', 5)
@@ -184,13 +216,14 @@ const compressedWithProgress = await compressAsync('Hello, World!', 5, (p) => {
 })
 ```
 
+`lzma-web/compress` also exports the low-level `compress` function. Without a
+completion callback, it is synchronous; prefer `compressSync` or
+`compressAsync` for an explicit execution model.
+
 #### Decompression Only (`lzma-web/decompress`)
 
 ```javascript
-import { decompress, decompressSync, decompressAsync } from 'lzma-web/decompress'
-
-// Async decompression
-const decompressed = await decompress(compressedData)
+import { decompressSync, decompressAsync } from 'lzma-web/decompress'
 
 // Sync decompression (blocking)
 const decompressedSync = decompressSync(compressedData)
@@ -201,21 +234,27 @@ const decompressedWithProgress = await decompressAsync(compressedData, (p) => {
 })
 ```
 
+`lzma-web/decompress` also exports the low-level `decompress` function. Without
+a completion callback, it is synchronous; prefer `decompressSync` or
+`decompressAsync` for an explicit execution model.
+
 > **Tip:** Use these modules when you only need one operation. This significantly reduces bundle size through tree-shaking.
 
 ---
 
 ## Web Workers
 
-### How It Works
+### Choosing an Execution Model
 
-The main `lzma-web` API automatically uses Web Workers in browsers to prevent blocking the UI thread. Workers are initialized lazily on first use.
+- **`lzma-web`** — Promise-based work on the current thread. This is the
+  general-purpose API, but it does not create a Worker.
+- **`lzma-web/worker`** — Promise-based work in a Web Worker. Use this in a
+  browser when compression must not block UI work.
+- **`lzma-web/sync`** — Blocking, synchronous work. Use this only where
+  blocking is acceptable.
 
-### Fallback Behavior
-
-- **Browser with Web Workers:** Operations run in a background thread
-- **Browser without Web Workers:** Falls back to main thread (blocking)
-- **Node.js:** Runs in main thread (no Worker support)
+The worker entry point has no main-thread fallback: it rejects an operation if
+the environment does not provide `Worker` support.
 
 ### Manual Worker Management
 
@@ -224,7 +263,7 @@ Use `lzma-web/worker` when you need explicit control:
 ```javascript
 import { createWorkerLZMA } from 'lzma-web/worker'
 
-// Each call creates a new Worker
+// Each handle creates its own Worker lazily, on its first operation
 const worker1 = createWorkerLZMA()
 const worker2 = createWorkerLZMA()
 
@@ -248,17 +287,17 @@ Choose the right entry point for your use case:
 | Entry Point | Use Case | Bundle Impact |
 |-------------|----------|---------------|
 | `lzma-web` | Need both compress & decompress | Full library |
-| `lzma-web/compress` | Only compressing data | ~50% smaller |
-| `lzma-web/decompress` | Only decompressing data | ~50% smaller |
+| `lzma-web/compress` | Only compressing data | Excludes decompression code |
+| `lzma-web/decompress` | Only decompressing data | Excludes compression code |
 | `lzma-web/sync` | Synchronous operations only | Similar to main |
 
 Example for a client that only decompresses server-compressed data:
 
 ```javascript
-// Only imports decompression code - smaller bundle!
-import { decompress } from 'lzma-web/decompress'
+// Imports decompression code only; this runs asynchronously on the current thread
+import { decompressAsync } from 'lzma-web/decompress'
 
-const data = await decompress(serverResponse)
+const data = await decompressAsync(serverResponse)
 ```
 
 ---
@@ -290,11 +329,8 @@ pnpm test:bench
 
 ---
 
-[ci-badge]: https://img.shields.io/github/actions/workflow/status/biw/lzma-web/ci.yml?branch=main&style=flat-square
-[ci]: https://github.com/biw/lzma-web/actions/workflows/ci.yml
-[version-badge]: https://img.shields.io/npm/v/lzma-web.svg?style=flat-square
+[ci-badge]: https://badgen.net/github/checks/biw/lzma-web
+[ci]: https://github.com/biw/lzma-web/actions?query=branch%3Amain
+[version-badge]: https://badgen.net/npm/v/lzma-web
 [package]: https://www.npmjs.com/package/lzma-web
-[license-badge]: https://img.shields.io/npm/l/lzma-web.svg?style=flat-square
-[license]: https://github.com/biw/lzma-web/blob/main/LICENSE
-[bundlephobia]: https://bundlephobia.com/result?p=lzma-web
-[bundlephobia-badge]: https://img.shields.io/bundlephobia/minzip/lzma-web@latest?style=flat-square
+[npm-downloads-badge]: https://badgen.net/npm/dt/lzma-web

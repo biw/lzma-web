@@ -6,10 +6,10 @@
  *
  * @example
  * ```ts
- * import { compress, compressSync } from 'lzma-web/compress'
+ * import { compressAsync, compressSync } from 'lzma-web/compress'
  *
  * // Async compression
- * const compressed = await compress('Hello, World!', 9)
+ * const compressed = await compressAsync('Hello, World!', 9)
  *
  * // Sync compression
  * const compressedSync = compressSync('Hello, World!', 1)

@@ -3553,6 +3553,16 @@ function encode(s: any): any {
 export function compress(
   str: string | Uint8Array | ArrayBuffer,
   mode: CompressMode,
+): Uint8Array
+export function compress(
+  str: string | Uint8Array | ArrayBuffer,
+  mode: CompressMode,
+  on_finish: OnFinishCallback | number,
+  on_progress?: OnProgressCallback,
+): void
+export function compress(
+  str: string | Uint8Array | ArrayBuffer,
+  mode: CompressMode,
   on_finish?: OnFinishCallback | number,
   on_progress?: OnProgressCallback,
 ): Uint8Array | void {
@@ -3655,6 +3665,14 @@ export function compress(
 }
 /** ce */
 /** ds */
+export function decompress(
+  byte_arr: Uint8Array | ArrayBuffer,
+): string | Uint8Array
+export function decompress(
+  byte_arr: Uint8Array | ArrayBuffer,
+  on_finish: OnFinishCallback | number,
+  on_progress?: OnProgressCallback,
+): void
 export function decompress(
   byte_arr: Uint8Array | ArrayBuffer,
   on_finish?: OnFinishCallback | number,

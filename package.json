@@ -1,7 +1,7 @@
 {
   "name": "lzma-web",
   "description": "A JavaScript implementation of the Lempel-Ziv-Markov (LZMA) chain compression algorithm",
-  "version": "4.0.0-rc.5",
+  "version": "4.0.0",
   "homepage": "https://github.com/biw/lzma-web",
   "repository": {
     "type": "git",
@@ -11,6 +11,9 @@
     "url": "https://github.com/biw/lzma-web/issues"
   },
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -60,6 +63,7 @@
   "files": [
     "dist"
   ],
+  "sideEffects": false,
   "devDependencies": {
     "@ark/attest": "^0.56.0",
     "@eslint/js": "^9.38.0",
@@ -96,8 +100,12 @@
     "test:perf": "node scripts/track-perf.js",
     "test:bench": "vitest bench",
     "test:compare": "vitest bench tests/comparison.bench.ts",
+    "pretest:browser": "pnpm build",
     "test:browser": "vitest run --config vitest.browser.config.ts",
-    "test:all": "vitest run && vitest run --config vitest.browser.config.ts",
+    "test:browser:coverage": "pnpm build && vitest run --config vitest.browser.config.ts --coverage",
+    "test:package": "pnpm build && node scripts/test-package-consumer.mjs",
+    "test:all": "pnpm test && pnpm test:package && pnpm test:browser",
+    "test:release": "pnpm lint && pnpm type-check && pnpm test:coverage && pnpm test:package && pnpm test:browser:coverage && pnpm test:electron",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'",
     "type-check": "tsc --noEmit",
