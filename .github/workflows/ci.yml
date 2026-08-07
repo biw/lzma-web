@@ -139,3 +139,11 @@ jobs:
           name: browser-worker-coverage
           path: coverage/browser
           if-no-files-found: warn
+
+  publish:
+    needs: [lint-and-build, electron-smoke, browser-worker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/publish.yml
+    permissions:
+      contents: write
+      id-token: write
