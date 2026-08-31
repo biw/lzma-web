@@ -3137,7 +3137,7 @@ class BitTreeEncoder {
 
   encode(rangeEncoder: any, symbol: number): void {
     let m = 1
-    for (let bitIndex = this.NumBitLevels; bitIndex != 0; ) {
+    for (let bitIndex = this.NumBitLevels; bitIndex != 0;) {
       bitIndex -= 1
       const bit = (symbol >>> bitIndex) & 1
       $Encode_3(rangeEncoder, this.Models, m, bit)
@@ -3148,7 +3148,7 @@ class BitTreeEncoder {
   getPrice(symbol: number): number {
     let m = 1
     let price = 0
-    for (let bitIndex = this.NumBitLevels; bitIndex != 0; ) {
+    for (let bitIndex = this.NumBitLevels; bitIndex != 0;) {
       bitIndex -= 1
       const bit = (symbol >>> bitIndex) & 1
       price += GetPrice(this.Models[m], bit)
@@ -3222,7 +3222,7 @@ function $BitTreeEncoder(this$static: any, numBitLevels: number): any {
 }
 function $Encode_2(this$static: any, rangeEncoder: any, symbol: number): void {
   let m = 1
-  for (let bitIndex = this$static.NumBitLevels; bitIndex != 0; ) {
+  for (let bitIndex = this$static.NumBitLevels; bitIndex != 0;) {
     bitIndex -= 1
     const bit = (symbol >>> bitIndex) & 1
     $Encode_3(rangeEncoder, this$static.Models, m, bit)
@@ -3232,7 +3232,7 @@ function $Encode_2(this$static: any, rangeEncoder: any, symbol: number): void {
 function $GetPrice_1(this$static: any, symbol: number): number {
   let m = 1
   let price = 0
-  for (let bitIndex = this$static.NumBitLevels; bitIndex != 0; ) {
+  for (let bitIndex = this$static.NumBitLevels; bitIndex != 0;) {
     bitIndex -= 1
     const bit = (symbol >>> bitIndex) & 1
     price += GetPrice(this$static.Models[m], bit)

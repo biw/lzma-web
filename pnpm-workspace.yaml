@@ -2,3 +2,5 @@ allowBuilds:
   esbuild: true
   lzma-native: true
   msw: true
+overrides:
+  esbuild: 0.28.2

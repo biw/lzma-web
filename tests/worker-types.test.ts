@@ -1,5 +1,4 @@
-import { attest } from '@ark/attest'
-import { describe, test } from 'vitest'
+import { describe, expectTypeOf, test } from 'vitest'
 import { createWorkerLZMA } from '../src/worker-api.js'
 import type {
   CompressMode,
@@ -11,21 +10,21 @@ describe('Worker API types', () => {
   test('createWorkerLZMA exposes the expected public shape', () => {
     const lzma = createWorkerLZMA()
 
-    attest<WorkerLZMA>(lzma)
-    attest<
+    expectTypeOf(lzma).toEqualTypeOf<WorkerLZMA>()
+    expectTypeOf(lzma.compress).toEqualTypeOf<
       (
         input: string | Uint8Array | ArrayBuffer,
         mode?: CompressMode,
         onProgress?: OnProgressCallback,
       ) => Promise<Uint8Array>
-    >(lzma.compress)
-    attest<
+    >()
+    expectTypeOf(lzma.decompress).toEqualTypeOf<
       (
         input: Uint8Array | ArrayBuffer,
         onProgress?: OnProgressCallback,
       ) => Promise<string | Uint8Array>
-    >(lzma.decompress)
-    attest<() => void>(lzma.terminate)
-    attest<Worker | null>(lzma.worker)
+    >()
+    expectTypeOf(lzma.terminate).toEqualTypeOf<() => void>()
+    expectTypeOf(lzma.worker).toEqualTypeOf<Worker | null>()
   })
 })

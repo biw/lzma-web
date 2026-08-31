@@ -1,3 +1,4 @@
+import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
 
 // GitHub-hosted Ubuntu runners already include Google Chrome.  Using it there
@@ -27,15 +28,16 @@ export default defineConfig({
     globalSetup: ['tests/browser-consumer.setup.ts'],
     browser: {
       enabled: true,
-      name: 'chromium',
-      provider: 'playwright',
-      providerOptions: chromiumExecutablePath
-        ? {
-            launch: {
-              executablePath: chromiumExecutablePath,
-            },
-          }
-        : {},
+      provider: playwright({
+        ...(chromiumExecutablePath
+          ? {
+              launchOptions: {
+                executablePath: chromiumExecutablePath,
+              },
+            }
+          : {}),
+      }),
+      instances: [{ browser: 'chromium' }],
       headless: true,
     },
     coverage: {

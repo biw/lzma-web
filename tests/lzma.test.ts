@@ -62,10 +62,8 @@ const decompression_test = async (
 
 const compression_test = async (file: string) => {
   const ext = path.extname(file).toLowerCase()
-  let content: string | Buffer = fs.readFileSync(
-    file,
-    ext === '.txt' ? 'utf8' : null,
-  ) as string | Buffer
+  let content =
+    ext === '.txt' ? fs.readFileSync(file, 'utf8') : fs.readFileSync(file)
 
   // let comp_start = get_hrtime()
   let compression_mode = 1

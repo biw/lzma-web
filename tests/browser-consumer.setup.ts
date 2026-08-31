@@ -19,15 +19,24 @@ function runNpm(args: string[], cwd: string): string {
 }
 
 export default function setupBrowserConsumer() {
-  const packDirectory = mkdtempSync(join(tmpdir(), 'lzma-web-browser-consumer-'))
+  const packDirectory = mkdtempSync(
+    join(tmpdir(), 'lzma-web-browser-consumer-'),
+  )
 
   try {
-    const packed = JSON.parse(
+    const metadata = JSON.parse(
       runNpm(
-        ['pack', '--json', '--ignore-scripts', '--pack-destination', packDirectory],
+        [
+          'pack',
+          '--json',
+          '--ignore-scripts',
+          '--pack-destination',
+          packDirectory,
+        ],
         repositoryRoot,
       ),
-    ) as Array<{ filename: string }>
+    ) as Array<{ filename: string }> | Record<string, { filename: string }>
+    const packed = Array.isArray(metadata) ? metadata : Object.values(metadata)
     const tarball = packed[0]?.filename
 
     if (!tarball || !readdirSync(packDirectory).includes(tarball)) {

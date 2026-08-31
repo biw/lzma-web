@@ -106,10 +106,8 @@ const hasWorkers = typeof Worker !== 'undefined'
 // ============================================================================
 
 // Try to load @sarakusha/lzma (ES6 wrapper)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let sarakushaLzma: { compress: Function; decompress: Function } | null = null
 try {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const module = (await import('@sarakusha/lzma')) as any
   // @sarakusha/lzma exports compress/decompress directly
   if (typeof module.compress === 'function') {
@@ -142,10 +140,8 @@ try {
 }
 
 // Try to load original lzma (LZMA-JS)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let originalLzma: { compress: Function; decompress: Function } | null = null
 try {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const module = (await import('lzma')) as any
   // lzma package exports LZMA class as default
   const LZMAClass = module.default || module.LZMA
