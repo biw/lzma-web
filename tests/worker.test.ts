@@ -1,11 +1,4 @@
-import {
-  describe,
-  test,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from 'vitest'
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'
 import { createWorkerLZMA } from '../src/worker-api.js'
 import type { WorkerLZMA } from '../src/types.js'
 
@@ -237,7 +230,9 @@ describe('Worker API', () => {
         }
 
         postMessage(message: { action: number; cbn: number }): void {
-          const handler = this.onmessage as ((event: MessageEvent) => void) | null
+          const handler = this.onmessage as
+            | ((event: MessageEvent) => void)
+            | null
           handler?.({
             data: {
               action: message.action,
@@ -276,7 +271,9 @@ describe('Worker API', () => {
         constructor(_url: URL | string, _options?: unknown) {}
 
         postMessage(message: { action: number; cbn: number }): void {
-          const handler = this.onmessage as ((event: MessageEvent) => void) | null
+          const handler = this.onmessage as
+            | ((event: MessageEvent) => void)
+            | null
           handler?.({
             data:
               message.action === 1

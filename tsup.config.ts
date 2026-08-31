@@ -14,7 +14,9 @@ export default defineConfig([
     ],
     outDir: 'dist',
     format: ['esm', 'cjs'],
-    dts: true,
+    // TypeScript 7 no longer exposes the compiler API used by tsup's bundled
+    // declaration plugin. Declarations are emitted by tsc after this build.
+    dts: false,
     sourcemap: true,
     clean: true,
     minify: true,

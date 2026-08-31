@@ -24,15 +24,16 @@ function run(command, args, cwd) {
   return execFileSync(command, args, { cwd, encoding: 'utf8' })
 }
 
-function parseJsonArray(output) {
-  // npm 8 prints lifecycle output before --json output. The package test must
-  // support the minimum Node/npm environment we document, while still parsing
-  // npm's trailing JSON array on newer versions.
-  const match = output.match(/(?:^|\n)(\[[\s\S]*\])\s*$/)
+function parsePackOutput(output) {
+  // npm 8 prints lifecycle output before --json output, while newer npm
+  // versions may return an object keyed by package name instead of an array.
+  const match = output.match(/(?:^|\n)(\[[\s\S]*\]|\{[\s\S]*\})\s*$/)
   if (!match) {
-    throw new Error(`npm did not return a JSON array:\n${output}`)
+    throw new Error(`npm did not return JSON pack metadata:\n${output}`)
   }
-  return JSON.parse(match[1])
+
+  const metadata = JSON.parse(match[1])
+  return Array.isArray(metadata) ? metadata : Object.values(metadata)
 }
 
 function runNode(args) {
@@ -62,10 +63,16 @@ async function bundleConsumer(source) {
 }
 
 try {
-  const packed = parseJsonArray(
+  const packed = parsePackOutput(
     run(
       npm,
-      ['pack', '--json', '--ignore-scripts', '--pack-destination', packDirectory],
+      [
+        'pack',
+        '--json',
+        '--ignore-scripts',
+        '--pack-destination',
+        packDirectory,
+      ],
       repositoryRoot,
     ),
   )
@@ -77,7 +84,11 @@ try {
 
   writeFileSync(
     join(consumerDirectory, 'package.json'),
-    JSON.stringify({ name: 'lzma-web-package-consumer', private: true, type: 'module' }),
+    JSON.stringify({
+      name: 'lzma-web-package-consumer',
+      private: true,
+      type: 'module',
+    }),
   )
   run(
     npm,
